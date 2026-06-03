@@ -26,7 +26,7 @@ Steps (use a normal browser — not this terminal):
   6. The URL looks like:
      https://stooq.com/q/d/l/?s=spy.us&i=d&apikey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 
-  7. Add to your `.env` file — the line MUST start with the variable name:
+  7. Add to your .env file — the line MUST start with the variable name:
 
      STOOQ_SPY_CSV_URL=https://stooq.com/q/d/l/?s=spy.us&i=d&apikey=YOUR_KEY_HERE
 
@@ -36,7 +36,7 @@ Steps (use a normal browser — not this terminal):
 
      STOOQ_API_KEY=YOUR_KEY_HERE
 
-  8. Refresh market data (restart `npm run dev` if it is already running):
+  8. Refresh market data (restart npm run dev if it is already running):
 
      npm run update-sp500
 

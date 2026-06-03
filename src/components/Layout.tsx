@@ -8,7 +8,7 @@ export function Layout() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { session, signOut, openAuthModal } = useAuth()
-  const { state } = useDsa()
+  const { state, syncError, clearSyncError } = useDsa()
   const cloudEnabled = isSupabaseConfigured()
   const appHome = homeAppPath(state.kids)
   const isFamily = pathname === '/family'
@@ -72,6 +72,18 @@ export function Layout() {
       </header>
 
       <main className="site-main">
+        {cloudEnabled && session && syncError ? (
+          <div className="sync-error-banner" role="alert">
+            <p>Couldn&apos;t save to the cloud: {syncError}</p>
+            <button
+              type="button"
+              className="btn secondary btn-compact"
+              onClick={clearSyncError}
+            >
+              Dismiss
+            </button>
+          </div>
+        ) : null}
         <Outlet />
       </main>
     </div>

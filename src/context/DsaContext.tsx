@@ -41,6 +41,9 @@ type DsaContextValue = {
   remoteHydrated: boolean
   /** Cloud fetch failed — app will not push (avoids wiping remote data). */
   cloudLoadStatus: CloudLoadStatus
+  /** Last cloud save error (push), if any. */
+  syncError: string | null
+  clearSyncError: () => void
   retryCloudLoad: () => void
   kidById: Map<string, Kid>
   accountById: Map<string, Account>
@@ -110,6 +113,7 @@ export function DsaProvider({
   const [cloudLoadStatus, setCloudLoadStatus] = useState<CloudLoadStatus>(() =>
     remoteUserId ? 'loading' : 'local',
   )
+  const [syncError, setSyncError] = useState<string | null>(null)
   /** True after the first successful cloud pull for the current user. */
   const cloudPullDoneRef = useRef(false)
   const marketRefreshGenRef = useRef(0)
@@ -138,6 +142,7 @@ export function DsaProvider({
         if (cancelled) return
         setState(remote)
         setCloudLoadStatus('ready')
+        setSyncError(null)
         cloudPullDoneRef.current = true
       })
       .catch((err) => {
@@ -158,6 +163,7 @@ export function DsaProvider({
       .then((remote) => {
         setState(remote)
         setCloudLoadStatus('ready')
+        setSyncError(null)
         cloudPullDoneRef.current = true
       })
       .catch((err) => {
@@ -201,9 +207,18 @@ export function DsaProvider({
     let cancelled = false
     const t = setTimeout(() => {
       if (!cancelled) {
-        pushDsaState(remoteUserId, state).catch((err) =>
-          console.error('[DSA] Supabase sync failed', err),
-        )
+        void pushDsaState(remoteUserId, state)
+          .then(() => {
+            if (!cancelled) setSyncError(null)
+          })
+          .catch((err) => {
+            console.error('[DSA] Supabase sync failed', err)
+            if (!cancelled) {
+              setSyncError(
+                err instanceof Error ? err.message : 'Cloud save failed',
+              )
+            }
+          })
       }
     }, 650)
     return () => {
@@ -546,11 +561,15 @@ export function DsaProvider({
     [],
   )
 
+  const clearSyncError = useCallback(() => setSyncError(null), [])
+
   const value = useMemo(
     () => ({
       state,
       remoteHydrated,
       cloudLoadStatus,
+      syncError,
+      clearSyncError,
       retryCloudLoad,
       kidById,
       accountById,
@@ -574,6 +593,8 @@ export function DsaProvider({
       state,
       remoteHydrated,
       cloudLoadStatus,
+      syncError,
+      clearSyncError,
       retryCloudLoad,
       kidById,
       accountById,
