@@ -82,6 +82,7 @@ function resolveStooqSpyCsvUrl(opts) {
   }
   const apikey = opts.apikey?.trim()
   if (apikey) {
+    if (/^https?:\/\//i.test(apikey) && /apikey=/i.test(apikey)) return apikey
     return `https://stooq.com/q/d/l/?s=spy.us&i=d&apikey=${encodeURIComponent(apikey)}`
   }
   return null
@@ -95,8 +96,8 @@ const stooqUrl = resolveStooqSpyCsvUrl({
 if (!stooqUrl) {
   console.error(
     'Stooq is not configured.\n\n' +
-      'Run: npm run stooq-setup\n' +
-      'Then set STOOQ_SPY_CSV_URL or STOOQ_API_KEY and run this script again.',
+      'Local: set STOOQ_SPY_CSV_URL or STOOQ_API_KEY in .env (run npm run stooq-setup).\n' +
+      'GitHub Actions: add repository secrets STOOQ_SPY_CSV_URL (full URL) or STOOQ_API_KEY (key only).',
   )
   process.exit(1)
 }

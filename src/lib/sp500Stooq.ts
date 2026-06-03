@@ -36,7 +36,10 @@ export function resolveStooqSpyCsvUrl(opts: {
     if (fromUrl) return stooqSpyCsvUrl(fromUrl)
   }
   const apikey = opts.apikey?.trim()
-  if (apikey) return stooqSpyCsvUrl(apikey)
+  if (apikey) {
+    if (/^https?:\/\//i.test(apikey) && /apikey=/i.test(apikey)) return apikey
+    return stooqSpyCsvUrl(apikey)
+  }
   return null
 }
 

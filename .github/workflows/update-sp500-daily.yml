@@ -22,6 +22,7 @@ jobs:
 
       - name: Fetch and write sp500-daily-returns.json
         env:
+          STOOQ_SPY_CSV_URL: ${{ secrets.STOOQ_SPY_CSV_URL }}
           STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
         run: node scripts/fetch-sp500-daily.mjs
 
