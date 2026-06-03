@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Dad Savings Account</title>
+    <script>
+      // GitHub Pages SPA fallback for /dsa/ (see https://github.com/rafgraph/spa-github-pages)
+      ;(function (l) {
+        var repoSegment = '/dsa'
+        if (l.pathname.startsWith(repoSegment + '/')) {
+          var rest = l.pathname.slice(repoSegment.length + 1) + l.search + l.hash
+          l.replace(
+            l.protocol +
+              '//' +
+              l.hostname +
+              (l.port ? ':' + l.port : '') +
+              repoSegment +
+              '/?/' +
+              rest.replace(/&/g, '~and~'),
+          )
+        } else {
+          l.replace(l.protocol + '//' + l.hostname + repoSegment + '/')
+        }
+      })(window.location)
+    </script>
+  </head>
+  <body></body>
+</html>
