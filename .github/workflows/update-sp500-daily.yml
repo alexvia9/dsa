@@ -14,11 +14,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
-          node-version: '22'
+          node-version: '24'
 
       - name: Fetch and write sp500-daily-returns.json
         env:
@@ -26,7 +26,7 @@ jobs:
           STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
         run: node scripts/fetch-sp500-daily.mjs
 
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      - uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: 'chore(data): refresh SPY daily returns (S&P 500 proxy)'
           file_pattern: |
