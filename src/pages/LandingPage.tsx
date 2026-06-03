@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LandingProductPreview } from '../components/LandingProductPreview'
+import { DsaLogoMark, DsaMonogram } from '../components/DsaLogoMark'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import {
   GROWTH_MODEL_ONE_LINE,
@@ -73,9 +74,8 @@ export function LandingPage() {
     <div className="landing-page">
       <header className="site-header">
         <div className="brand">
-          <span className="brand-mark" aria-hidden>
-            DSA
-          </span>
+          <DsaLogoMark className="brand-mark" variant="green" />
+          <DsaMonogram className="brand-monogram" />
           <span className="brand-text">
             <span className="brand-title">Dad Savings Account</span>
             <span className="brand-tagline">Family brokerage</span>

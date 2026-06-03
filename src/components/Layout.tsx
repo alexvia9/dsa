@@ -1,4 +1,5 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { DsaLogoMark, DsaMonogram } from './DsaLogoMark'
 import { useAuth } from '../context/AuthContext'
 import { useDsa } from '../context/DsaContext'
 import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
@@ -25,9 +26,8 @@ export function Layout() {
       <header className="site-header">
         <div className="brand">
           <Link to={appHome} className="brand-link">
-            <span className="brand-mark" aria-hidden>
-              DSA
-            </span>
+            <DsaLogoMark className="brand-mark" variant="green" />
+            <DsaMonogram className="brand-monogram" />
             <span className="brand-text">
               <span className="brand-title">Dad Savings Account</span>
               <span className="brand-tagline">Family brokerage</span>
