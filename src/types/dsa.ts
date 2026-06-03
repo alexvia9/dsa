@@ -23,9 +23,12 @@ export type InvestmentStrategy =
       mode: 'piggy_bank'
     }
 
+import type { KidAvatarColorId } from '../lib/kidAvatarColors'
+
 export type Kid = {
   id: string
   name: string
+  avatarColor: KidAvatarColorId
   createdAt: string
 }
 

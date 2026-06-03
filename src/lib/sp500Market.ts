@@ -42,14 +42,29 @@ function seedFromBundled(): void {
 
 seedFromBundled()
 
-/** Merge network fetch into module state. Empty/null is ignored so bundled data stays if fetch fails. */
+/** Replace module state. Empty/null is ignored so bundled data stays if fetch fails. */
 export function setSp500DailyReturns(m: Record<string, number> | null): void {
   if (!m || Object.keys(m).length === 0) {
     return
   }
-  returnsByYmd = m
+  returnsByYmd = { ...m }
   lastFetchedReturnDate = Object.keys(m).reduce((a, b) => (a > b ? a : b))
   loadAttempted = true
+}
+
+/** Merge new return days into bundled/static data (newer keys win on overlap). */
+export function mergeSp500DailyReturns(m: Record<string, number> | null): void {
+  if (!m || Object.keys(m).length === 0) return
+  returnsByYmd = returnsByYmd ? { ...returnsByYmd, ...m } : { ...m }
+  lastFetchedReturnDate = Object.keys(returnsByYmd).reduce((a, b) =>
+    a > b ? a : b,
+  )
+  loadAttempted = true
+}
+
+/** Latest YYYY-MM-DD with a published SPY close-to-close return. */
+export function sp500MarketAsOf(): string | null {
+  return lastFetchedReturnDate
 }
 
 /** Multiplier applied to balance after ledger flows on that calendar day (1 + daily return). */

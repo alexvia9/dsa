@@ -1,30 +1,72 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AuthModal } from './components/AuthModal'
 import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DsaProvider, useDsa } from './context/DsaContext'
 import { isSupabaseConfigured } from './lib/supabaseClient'
 import { AccountPage } from './pages/AccountPage'
-import { FamilyPage } from './pages/FamilyPage'
+import { FamilyHomeRoute } from './pages/FamilyHomeRoute'
 import { KidPage } from './pages/KidPage'
-import { LoginPage } from './pages/LoginPage'
+import { LandingPage } from './pages/LandingPage'
 import './App.css'
 
 function DsaBootGate({ children }: { children: ReactNode }) {
-  const { remoteHydrated } = useDsa()
-  if (!remoteHydrated) {
+  const { remoteHydrated, cloudLoadStatus, retryCloudLoad } = useDsa()
+
+  if (!remoteHydrated || cloudLoadStatus === 'loading') {
     return (
       <div className="app-boot">
         <p className="app-boot-text">Loading your saved family…</p>
       </div>
     )
   }
+
+  if (cloudLoadStatus === 'error') {
+    return (
+      <div className="app-boot">
+        <p className="app-boot-text">
+          Couldn&apos;t load your saved family from the cloud.
+        </p>
+        <p className="muted small app-boot-detail">
+          Your data was not changed. Check your connection and try again.
+        </p>
+        <button
+          type="button"
+          className="btn primary"
+          onClick={retryCloudLoad}
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
   return children
 }
 
-function AppRoutes() {
+function ProtectedShell() {
   const configured = isSupabaseConfigured()
-  const { session, loading } = useAuth()
+  const { session } = useAuth()
+
+  if (configured && !session) {
+    return <Navigate to="/" replace state={{ signIn: true }} />
+  }
+
+  const remoteUserId = configured && session ? session.user.id : null
+
+  return (
+    <DsaProvider remoteUserId={remoteUserId}>
+      <DsaBootGate>
+        <Layout />
+      </DsaBootGate>
+    </DsaProvider>
+  )
+}
+
+function AppRoutes() {
+  const { loading } = useAuth()
+  const configured = isSupabaseConfigured()
 
   if (configured && loading) {
     return (
@@ -34,36 +76,29 @@ function AppRoutes() {
     )
   }
 
-  if (configured && !session) {
-    return <LoginPage />
-  }
-
-  const remoteUserId = configured && session ? session.user.id : null
-  const routerBasename =
-    import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
-
   return (
-    <DsaProvider remoteUserId={remoteUserId}>
-      <BrowserRouter basename={routerBasename}>
-        <DsaBootGate>
-          <Routes>
-            <Route element={<Layout />}>
-              <Route path="/" element={<FamilyPage />} />
-              <Route path="/kids/:kidId" element={<KidPage />} />
-              <Route path="/accounts/:accountId" element={<AccountPage />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Route>
-          </Routes>
-        </DsaBootGate>
-      </BrowserRouter>
-    </DsaProvider>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route element={<ProtectedShell />}>
+        <Route path="/family" element={<FamilyHomeRoute />} />
+        <Route path="/kids/:kidId" element={<KidPage />} />
+        <Route path="/accounts/:accountId" element={<AccountPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
 export default function App() {
+  const routerBasename =
+    import.meta.env.BASE_URL.replace(/\/$/, '') || undefined
+
   return (
     <AuthProvider>
-      <AppRoutes />
+      <BrowserRouter basename={routerBasename}>
+        <AuthModal />
+        <AppRoutes />
+      </BrowserRouter>
     </AuthProvider>
   )
 }

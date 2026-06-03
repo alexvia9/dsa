@@ -9,9 +9,15 @@ import {
 import type { Session } from '@supabase/supabase-js'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
+type AuthModalMode = 'signIn' | 'signUp'
+
 type AuthContextValue = {
   session: Session | null
   loading: boolean
+  authModalOpen: boolean
+  authModalMode: AuthModalMode
+  openAuthModal: (mode?: AuthModalMode) => void
+  closeAuthModal: () => void
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
@@ -22,6 +28,18 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(() => isSupabaseConfigured())
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('signIn')
+
+  const openAuthModal = useMemo(
+    () => (mode: AuthModalMode = 'signIn') => {
+      setAuthModalMode(mode)
+      setAuthModalOpen(true)
+    },
+    [],
+  )
+
+  const closeAuthModal = useMemo(() => () => setAuthModalOpen(false), [])
 
   useEffect(() => {
     if (!isSupabaseConfigured()) return
@@ -91,11 +109,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       session,
       loading,
+      authModalOpen,
+      authModalMode,
+      openAuthModal,
+      closeAuthModal,
       signIn,
       signUp,
       signOut,
     }),
-    [session, loading, signIn, signUp, signOut],
+    [
+      session,
+      loading,
+      authModalOpen,
+      authModalMode,
+      openAuthModal,
+      closeAuthModal,
+      signIn,
+      signUp,
+      signOut,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

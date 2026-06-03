@@ -5,22 +5,39 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AddAccountFlow } from '../components/AddAccountFlow'
+import { AddChildFlow } from '../components/AddChildFlow'
 import { AccountGrowthTrend } from '../components/AccountGrowthTrend'
+import { FamilyBreadcrumb } from '../components/FamilyBreadcrumb'
+import { KidAvatar } from '../components/KidAvatar'
+import { KidAvatarColorPicker } from '../components/KidAvatarColorPicker'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { useDsa } from '../context/DsaContext'
 import { getAccountGrowthMetrics } from '../lib/accountGrowth'
 import { localDateString } from '../lib/dateLocal'
 import { formatUsd, parseUsdToCents } from '../lib/money'
 import { strategySummary } from '../lib/strategyLabel'
+import { confirmCloseChild } from '../lib/confirmCloseChild'
+import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
+import type { KidAvatarColorId } from '../lib/kidAvatarColors'
 import type { LedgerEntryKind } from '../types/dsa'
 
 export function KidPage() {
   const { kidId } = useParams<{ kidId: string }>()
-  const { state, kidById, accountsForKid, renameKid, deposit } = useDsa()
+  const navigate = useNavigate()
+  const {
+    state,
+    kidById,
+    accountsForKid,
+    renameKid,
+    setKidAvatarColor,
+    deposit,
+    closeKid,
+  } = useDsa()
   const [editingName, setEditingName] = useState(false)
   const [nameDraft, setNameDraft] = useState('')
+  const [avatarColorDraft, setAvatarColorDraft] = useState<KidAvatarColorId>('green')
   const [kidLedgerModalOpen, setKidLedgerModalOpen] = useState(false)
   const [kidLedgerModalKind, setKidLedgerModalKind] =
     useState<LedgerEntryKind>('deposit')
@@ -41,22 +58,38 @@ export function KidPage() {
   }, [kidLedgerModalOpen])
 
   const kidPortfolioMetrics = useMemo(() => {
-    if (!kidId) return { totalValueCents: 0, totalGrowthCents: 0 }
+    if (!kidId) {
+      return {
+        totalValueCents: 0,
+        totalGrowthCents: 0,
+        totalDepositsInCents: 0,
+        totalWithdrawalsCents: 0,
+      }
+    }
     const end = localDateString()
     let totalValueCents = 0
     let totalGrowthCents = 0
+    let totalDepositsInCents = 0
+    let totalWithdrawalsCents = 0
     const kidAccounts = state.accounts.filter((a) => a.kidId === kidId)
     for (const a of kidAccounts) {
       const deps = state.deposits.filter((d) => d.accountId === a.id)
       const m = getAccountGrowthMetrics(a, deps, end)
       totalValueCents += m.totalValueCents
       totalGrowthCents += m.growthCents
+      totalDepositsInCents += m.totalDepositsInCents
+      totalWithdrawalsCents += m.totalWithdrawalsCents
     }
-    return { totalValueCents, totalGrowthCents }
+    return {
+      totalValueCents,
+      totalGrowthCents,
+      totalDepositsInCents,
+      totalWithdrawalsCents,
+    }
   }, [kidId, state.accounts, state.deposits])
 
   if (!kidId) {
-    return <Navigate to="/" replace />
+    return <Navigate to={homeAppPath(state.kids)} replace />
   }
 
   const kid = kidById.get(kidId)
@@ -64,12 +97,18 @@ export function KidPage() {
     return (
       <div className="page">
         <p>Child not found.</p>
-        <Link to="/">Back to family</Link>
+        <Link to={homeAppPath(state.kids)}>Back home</Link>
       </div>
     )
   }
 
   const accounts = accountsForKid(kidId)
+  const growthClass =
+    kidPortfolioMetrics.totalGrowthCents > 0
+      ? 'account-fidelity-change--positive'
+      : kidPortfolioMetrics.totalGrowthCents < 0
+        ? 'account-fidelity-change--negative'
+        : ''
 
   const effectiveKidLedgerAccountId =
     kidLedgerAccountId && accounts.some((a) => a.id === kidLedgerAccountId)
@@ -112,139 +151,186 @@ export function KidPage() {
 
   return (
     <div className="page kid-page">
-      <nav className="breadcrumb">
-        <Link to="/">Family</Link>
-        <span aria-hidden> / </span>
-        <span>{kid.name}</span>
+      <nav
+        className="breadcrumb account-fidelity-breadcrumb"
+        aria-label="Breadcrumb"
+      >
+        <FamilyBreadcrumb />
+        <span aria-current="page">{kid.name}</span>
       </nav>
 
-      <header className="page-header kid-dashboard-header">
-        <p className="kid-dashboard-eyebrow">Account view</p>
-        {editingName ? (
-          <form
-            className="inline-form title-edit"
-            onSubmit={(e) => {
-              e.preventDefault()
-              renameKid(kidId, nameDraft)
-              setEditingName(false)
-            }}
-          >
-            <input
-              className="input"
-              value={nameDraft}
-              onChange={(e) => setNameDraft(e.target.value)}
-              aria-label="Child name"
-            />
-            <button type="submit" className="btn secondary">
-              Save
-            </button>
-            <button
-              type="button"
-              className="btn link"
-              onClick={() => setEditingName(false)}
-            >
-              Cancel
-            </button>
-          </form>
-        ) : (
-          <div className="title-row name-heading">
-            <h1 className="name-heading-title">{kid.name}</h1>
-            <button
-              type="button"
-              className="name-edit-btn"
-              onClick={() => {
-                setNameDraft(kid.name)
-                setEditingName(true)
-              }}
-              aria-label={`Edit ${kid.name}’s name`}
-            >
-              <svg
-                className="name-edit-icon"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </button>
-          </div>
-        )}
-        <p className="lede kid-dashboard-lede">
-          Combined balance and growth across {kid.name}’s accounts. Open an
-          account for details, rules, and history.
-        </p>
-      </header>
-
       <section
-        className="card kid-portfolio-overview"
+        className="account-fidelity-summary kid-fidelity-summary"
         aria-label={`${kid.name} portfolio overview`}
       >
-        <div className="kid-portfolio-overview-top">
-          <h2 className="card-title kid-portfolio-overview-title">Overview</h2>
-          <p className="muted small kid-portfolio-overview-meta">
-            {accounts.length} account{accounts.length === 1 ? '' : 's'} ·{' '}
-            <Link to="/">Family view</Link>
+        <div className="account-fidelity-summary-head kid-fidelity-summary-head">
+          {editingName ? (
+            <form
+              className="kid-profile-edit kid-fidelity-profile-edit"
+              onSubmit={(e) => {
+                e.preventDefault()
+                renameKid(kidId, nameDraft)
+                if (avatarColorDraft !== kid.avatarColor) {
+                  setKidAvatarColor(kidId, avatarColorDraft)
+                }
+                setEditingName(false)
+              }}
+            >
+              <div className="kid-profile-edit-panel">
+                <div className="kid-profile-edit-identity">
+                  <KidAvatar
+                    name={nameDraft || kid.name}
+                    colorId={avatarColorDraft}
+                    className="kid-profile-edit-avatar"
+                  />
+                  <KidAvatarColorPicker
+                    value={avatarColorDraft}
+                    onChange={setAvatarColorDraft}
+                    label="Profile color"
+                    compact
+                  />
+                </div>
+                <label className="field kid-profile-edit-field">
+                  <span className="label">Name</span>
+                  <input
+                    className="input kid-profile-edit-input"
+                    value={nameDraft}
+                    onChange={(e) => setNameDraft(e.target.value)}
+                    required
+                    autoComplete="off"
+                  />
+                </label>
+                <div className="kid-profile-edit-actions">
+                  <button type="submit" className="btn primary">
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="btn secondary"
+                    onClick={() => setEditingName(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          ) : (
+            <div className="kid-fidelity-identity">
+              <KidAvatar
+                name={kid.name}
+                colorId={kid.avatarColor}
+                className="kid-fidelity-avatar"
+              />
+              <div className="kid-fidelity-identity-copy">
+                <span className="account-fidelity-product-type">
+                  Child profile
+                </span>
+                <div className="account-fidelity-name-row">
+                  <h1 className="account-fidelity-name">{kid.name}</h1>
+                  <button
+                    type="button"
+                    className="account-fidelity-name-edit"
+                    onClick={() => {
+                      setNameDraft(kid.name)
+                      setAvatarColorDraft(kid.avatarColor)
+                      setEditingName(true)
+                    }}
+                    aria-label={`Edit ${kid.name}’s profile`}
+                  >
+                    Edit profile
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {accounts.length > 0 && !editingName ? (
+            <div
+              className="kid-fidelity-quick-actions"
+              aria-label="Quick deposit or withdrawal"
+            >
+              <button
+                type="button"
+                className="btn primary btn-compact"
+                onClick={() => openKidLedgerModal('deposit')}
+              >
+                Deposit
+              </button>
+              <button
+                type="button"
+                className="btn secondary btn-compact account-fidelity-btn-outline"
+                onClick={() => openKidLedgerModal('withdrawal')}
+              >
+                Withdraw
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="account-fidelity-balance-block">
+          <p className="account-fidelity-balance-label">Total value</p>
+          <p className="account-fidelity-balance">
+            {formatUsd(kidPortfolioMetrics.totalValueCents)}
+          </p>
+          <p className={`account-fidelity-change ${growthClass}`}>
+            <span className="account-fidelity-change-label">Total growth</span>
+            <span className="account-fidelity-change-value">
+              {formatUsd(kidPortfolioMetrics.totalGrowthCents)}
+            </span>
           </p>
         </div>
+
+        <dl className="account-fidelity-meta">
+          <div className="account-fidelity-meta-item">
+            <dt>Accounts</dt>
+            <dd>
+              {accounts.length} account{accounts.length === 1 ? '' : 's'}
+            </dd>
+          </div>
+          {showFamilyOverview(state.kids.length) ? (
+            <div className="account-fidelity-meta-item">
+              <dt>Family</dt>
+              <dd>
+                <Link to="/family">Household overview</Link>
+              </dd>
+            </div>
+          ) : null}
+        </dl>
+
         <div
-          className="kid-portfolio-stats"
+          className="account-fidelity-metrics"
           role="group"
-          aria-label="Total balance and growth"
+          aria-label="Portfolio totals"
         >
-          <div className="kid-portfolio-stat kid-portfolio-stat--balance">
-            <span className="account-stat-label">Total balance</span>
-            <span className="kid-portfolio-stat-value kid-portfolio-stat-value--total">
-              {formatUsd(kidPortfolioMetrics.totalValueCents)}
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Deposits</span>
+            <span className="account-fidelity-metric-value">
+              {formatUsd(kidPortfolioMetrics.totalDepositsInCents)}
             </span>
           </div>
-          <div className="kid-portfolio-stat">
-            <span className="account-stat-label">Total growth</span>
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Withdrawals</span>
+            <span className="account-fidelity-metric-value">
+              {formatUsd(-kidPortfolioMetrics.totalWithdrawalsCents)}
+            </span>
+          </div>
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Net growth</span>
             <span
-              className={
-                'kid-portfolio-stat-value' +
-                (kidPortfolioMetrics.totalGrowthCents > 0
-                  ? ' account-stat-value-growth-positive'
-                  : kidPortfolioMetrics.totalGrowthCents < 0
-                    ? ' account-stat-value-growth-negative'
-                    : '')
-              }
+              className={`account-fidelity-metric-value ${growthClass}`}
             >
               {formatUsd(kidPortfolioMetrics.totalGrowthCents)}
             </span>
           </div>
         </div>
 
+        {accounts.length === 0 ? (
+          <p className="account-fidelity-empty-hint">
+            Add an account below to start teaching {kid.name} how money grows.
+          </p>
+        ) : null}
+
         {accounts.length > 0 ? (
           <>
-            <div
-              className="kid-portfolio-quick"
-              aria-label="Quick deposit or withdrawal"
-            >
-              <span className="kid-portfolio-quick-label">Quick entry</span>
-              <span className="kid-portfolio-quick-actions">
-                <button
-                  type="button"
-                  className="btn secondary btn-compact kid-portfolio-quick-btn"
-                  onClick={() => openKidLedgerModal('deposit')}
-                >
-                  Deposit
-                </button>
-                <button
-                  type="button"
-                  className="btn secondary btn-compact kid-portfolio-quick-btn"
-                  onClick={() => openKidLedgerModal('withdrawal')}
-                >
-                  Withdraw
-                </button>
-              </span>
-            </div>
-
             <dialog
               ref={kidDepositDialogRef}
               className="strategy-rule-modal"
@@ -378,55 +464,167 @@ export function KidPage() {
         ) : null}
       </section>
 
-      <h2 className="kid-accounts-heading card-title">Accounts</h2>
-      {accounts.length === 0 ? (
-        <p className="muted kid-accounts-empty">
-          No accounts yet — tap <strong>Add an account</strong> on this page
-          to create the first one.
-        </p>
-      ) : null}
-      <ul className="account-table">
-        {accounts.map((a) => {
-          const accountDeposits = state.deposits.filter(
-            (d) => d.accountId === a.id,
-          )
-          return (
-          <li key={a.id}>
-            <Link
-              to={`/accounts/${a.id}`}
-              className={`card account-row-link account-row-link--${a.strategy.mode}`}
-              aria-label={`${a.name}, balance ${formatUsd(a.balanceCents)}. ${strategySummary(a.strategy, { omitBenchmark: true })}`}
-            >
-              <div className="account-row-main">
-                <div className="account-row-leading">
-                  <span className="account-row-strategy-icon" aria-hidden>
-                    <StrategyTypeCardIcon mode={a.strategy.mode} />
+      <section
+        className="account-fidelity-panel kid-fidelity-accounts"
+        aria-labelledby="kid-accounts-heading"
+      >
+        <div className="account-fidelity-panel-head">
+          <div className="account-fidelity-panel-head-copy">
+            <h2 id="kid-accounts-heading" className="account-fidelity-panel-title">
+              Accounts
+            </h2>
+            <p className="account-fidelity-panel-lede">
+              Holdings for {kid.name} — open an account for rules, performance,
+              and transaction history.
+            </p>
+          </div>
+        </div>
+
+        {accounts.length > 0 ? (
+          <div className="kid-fidelity-holdings-header" aria-hidden="true">
+            <span className="kid-fidelity-holdings-col-account">Account</span>
+            <span className="kid-fidelity-holdings-col-type">Type</span>
+            <span className="kid-fidelity-holdings-col-balance">Balance</span>
+            <span className="kid-fidelity-holdings-col-change">Change</span>
+          </div>
+        ) : null}
+
+        <ul
+          className={
+            accounts.length === 0
+              ? 'kid-fidelity-holdings kid-fidelity-holdings--no-accounts'
+              : 'kid-fidelity-holdings'
+          }
+        >
+          {accounts.map((a) => {
+            const accountDeposits = state.deposits.filter(
+              (d) => d.accountId === a.id,
+            )
+            return (
+              <li
+                key={a.id}
+                className={`kid-fidelity-holding-item kid-fidelity-holding-item--${a.strategy.mode}`}
+              >
+                <Link
+                  to={`/accounts/${a.id}`}
+                  className={`kid-fidelity-holding-row account-row-link--${a.strategy.mode}`}
+                  aria-label={`${a.name}, balance ${formatUsd(a.balanceCents)}. ${strategySummary(a.strategy, { omitBenchmark: true })}`}
+                >
+                  <span className="kid-fidelity-holding-account">
+                    <span
+                      className="account-fidelity-product-icon kid-fidelity-holding-icon"
+                      aria-hidden
+                    >
+                      <StrategyTypeCardIcon mode={a.strategy.mode} />
+                    </span>
+                    <span className="kid-fidelity-holding-name">{a.name}</span>
                   </span>
-                  <span className="account-name">{a.name}</span>
-                </div>
-                <div className="account-row-balance-stack">
-                  <span className="account-balance">
+                  <span className="kid-fidelity-holding-type muted small">
+                    {strategySummary(a.strategy, { omitBenchmark: true })}
+                  </span>
+                  <span className="kid-fidelity-holding-balance">
                     {formatUsd(a.balanceCents)}
                   </span>
-                  <AccountGrowthTrend
-                    account={a}
-                    deposits={accountDeposits}
-                  />
-                </div>
-              </div>
-              <p className="strategy-pill block">
-                {strategySummary(a.strategy, { omitBenchmark: true })}
-              </p>
-            </Link>
-          </li>
-          )
-        })}
-        <AddAccountFlow
-          kidId={kidId}
-          kidName={kid.name}
-          afterCreate="account"
-        />
-      </ul>
+                  <span className="kid-fidelity-holding-change">
+                    <AccountGrowthTrend
+                      account={a}
+                      deposits={accountDeposits}
+                    />
+                  </span>
+                </Link>
+              </li>
+            )
+          })}
+          <AddAccountFlow
+            kidId={kidId}
+            kidName={kid.name}
+            afterCreate="account"
+            prominentWhenEmpty={accounts.length === 0}
+          />
+        </ul>
+      </section>
+
+      {state.kids.length === 1 ? (
+        <div className="kid-family-actions">
+          <section className="account-fidelity-panel kid-family-action-card">
+            <h2 className="account-fidelity-panel-title">Add another child</h2>
+            <p className="muted small kid-family-action-lede">
+              Unlock the family overview — everyone&apos;s balances on one
+              screen.
+            </p>
+            <AddChildFlow
+              variant="standalone"
+              navigateTo="family"
+              ctaLabel="Add another child"
+            />
+          </section>
+          <section className="account-fidelity-panel kid-family-action-card">
+            <h2 className="account-fidelity-panel-title">Remove child</h2>
+            <p className="muted small kid-family-action-lede">
+              Remove <strong>{kid.name}</strong> and all{' '}
+              {accounts.length === 1
+                ? 'their account'
+                : `${accounts.length} accounts`}
+              {accounts.length === 0 ? ' (none yet)' : ''} from your family.
+            </p>
+            <button
+              type="button"
+              className="btn secondary kid-family-action-btn account-close-btn"
+              onClick={() => {
+                if (
+                  !confirmCloseChild(
+                    kid,
+                    accounts.length,
+                    kidPortfolioMetrics.totalValueCents,
+                  )
+                ) {
+                  return
+                }
+                const nextHome = homeAppPath(
+                  state.kids.filter((k) => k.id !== kidId),
+                )
+                closeKid(kidId)
+                navigate(nextHome)
+              }}
+            >
+              Remove {kid.name}
+            </button>
+          </section>
+        </div>
+      ) : (
+        <section className="account-fidelity-panel kid-family-action-card">
+          <h2 className="account-fidelity-panel-title">Remove child</h2>
+          <p className="muted small kid-family-action-lede">
+            Remove <strong>{kid.name}</strong> and all{' '}
+            {accounts.length === 1
+              ? 'their account'
+              : `${accounts.length} accounts`}
+            {accounts.length === 0 ? ' (none yet)' : ''} from your family.
+          </p>
+          <button
+            type="button"
+            className="btn secondary kid-family-action-btn account-close-btn"
+            onClick={() => {
+              if (
+                !confirmCloseChild(
+                  kid,
+                  accounts.length,
+                  kidPortfolioMetrics.totalValueCents,
+                )
+              ) {
+                return
+              }
+              const nextHome = homeAppPath(
+                state.kids.filter((k) => k.id !== kidId),
+              )
+              closeKid(kidId)
+              navigate(nextHome)
+            }}
+          >
+            Remove {kid.name}
+          </button>
+        </section>
+      )}
     </div>
   )
 }

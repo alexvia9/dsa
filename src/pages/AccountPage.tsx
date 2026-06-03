@@ -5,12 +5,15 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Link, Navigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AccountGrowthChart } from '../components/AccountGrowthChart'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { LedgerMonthEndGrowthField } from '../components/MonthEndRatesByLedgerMonth'
 import { StrategyEditor } from '../components/StrategyEditor'
+import { FamilyBreadcrumb } from '../components/FamilyBreadcrumb'
 import { useDsa } from '../context/DsaContext'
+import { CloseAccountSection } from '../components/CloseAccountSection'
+import { homeAppPath } from '../lib/familyRouting'
 import { localDateString } from '../lib/dateLocal'
 import {
   getAccountGrowthMetrics,
@@ -21,6 +24,7 @@ import { formatMonthYearLabel } from '../lib/formatMonthYm'
 import { cloneInvestmentStrategy } from '../lib/cloneStrategy'
 import { signedLedgerAmountCents } from '../lib/ledger'
 import { formatUsd, parseUsdToCents } from '../lib/money'
+import { accountTypeForMode } from '../lib/accountTypeCatalog'
 import { strategySummary } from '../lib/strategyLabel'
 import type {
   Account,
@@ -138,6 +142,15 @@ function AccountLedgerSection({
       role="region"
       aria-label="Transactions by month"
     >
+      {deposits.length > 0 ? (
+        <div className="account-fidelity-ledger-header" aria-hidden="true">
+          <div className="account-fidelity-ledger-header-main">
+            <span className="account-fidelity-ledger-col-date">Date</span>
+            <span className="account-fidelity-ledger-col-note">Description</span>
+            <span className="account-fidelity-ledger-col-amount">Amount</span>
+          </div>
+        </div>
+      ) : null}
       {displayedMonths.length === 0 && monthsDescending.length > 0 ? (
         <p className="muted deposit-ledger-empty-view">
           Nothing in this range — try another option below.
@@ -304,6 +317,7 @@ function AccountLedgerSection({
 
 export function AccountPage() {
   const { accountId } = useParams<{ accountId: string }>()
+  const navigate = useNavigate()
   const {
     state,
     accountById,
@@ -378,20 +392,27 @@ export function AccountPage() {
   }, [ledgerModalOpen])
 
   if (!accountId) {
-    return <Navigate to="/" replace />
+    return <Navigate to={homeAppPath(state.kids)} replace />
   }
 
   if (!account) {
     return (
       <div className="page">
         <p>Account not found.</p>
-        <Link to="/">Family</Link>
+        <Link to={homeAppPath(state.kids)}>Back home</Link>
       </div>
     )
   }
 
   const kid = kidById.get(account.kidId)
   const metrics = getAccountGrowthMetrics(account, deposits)
+  const product = accountTypeForMode(account.strategy.mode)
+  const growthClass =
+    metrics.growthCents > 0
+      ? 'account-fidelity-change--positive'
+      : metrics.growthCents < 0
+        ? 'account-fidelity-change--negative'
+        : ''
 
   const openStrategyModal = () => {
     const draft = cloneInvestmentStrategy(account.strategy)
@@ -478,205 +499,190 @@ export function AccountPage() {
 
   return (
     <div className="page account-page">
-      <nav className="breadcrumb">
-        <Link to="/">Family</Link>
-        {kid && (
+      <nav className="breadcrumb account-fidelity-breadcrumb" aria-label="Breadcrumb">
+        <FamilyBreadcrumb />
+        {kid ? (
           <>
-            <span aria-hidden> / </span>
             <Link to={`/kids/${kid.id}`}>{kid.name}</Link>
+            <span aria-hidden> / </span>
           </>
-        )}
-        <span aria-hidden> / </span>
-        <span>{account.name}</span>
+        ) : null}
+        <span aria-current="page">{account.name}</span>
       </nav>
 
-      <header className="page-header account-page-header">
-        {editingName ? (
+      <section
+        className={`account-fidelity-summary account-fidelity-summary--${account.strategy.mode}`}
+        aria-label="Account overview"
+      >
+        <div className="account-fidelity-summary-head">
           <div
-            className={`title-row account-title-row name-heading account-title-row--${account.strategy.mode}`}
+            className={`account-fidelity-product account-fidelity-product--${account.strategy.mode}`}
           >
-            <span className="account-title-strategy-icon-wrap" aria-hidden>
+            <span className="account-fidelity-product-icon" aria-hidden>
               <StrategyTypeCardIcon mode={account.strategy.mode} />
             </span>
-            <form
-              className="inline-form title-edit"
-              onSubmit={(e) => {
-                e.preventDefault()
-                renameAccount(accountId, nameDraft)
-                setEditingName(false)
-              }}
-            >
-              <input
-                className="input"
-                value={nameDraft}
-                onChange={(e) => setNameDraft(e.target.value)}
-                aria-label="Account name"
-              />
-              <button type="submit" className="btn secondary">
-                Save
-              </button>
-              <button
-                type="button"
-                className="btn link"
-                onClick={() => setEditingName(false)}
-              >
-                Cancel
-              </button>
-            </form>
-          </div>
-        ) : (
-          <>
-            <div
-              className={`title-row account-title-row name-heading account-title-row--${account.strategy.mode}`}
-            >
-              <span className="account-title-strategy-icon-wrap" aria-hidden>
-                <StrategyTypeCardIcon mode={account.strategy.mode} />
+            <div className="account-fidelity-product-copy">
+              <span className="account-fidelity-product-type">
+                {product.accountName}
               </span>
-              <div className="name-heading-label-group">
-                <h1 className="name-heading-title">{account.name}</h1>
-                <button
-                  type="button"
-                  className="name-edit-btn"
-                  onClick={() => {
-                    setNameDraft(account.name)
-                    setEditingName(true)
+              {editingName ? (
+                <form
+                  className="account-fidelity-name-form inline-form"
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    renameAccount(accountId, nameDraft)
+                    setEditingName(false)
                   }}
-                  aria-label={`Edit account name (${account.name})`}
                 >
-                  <svg
-                    className="name-edit-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <p className="account-type-line">
-              <span className="account-type-label">Growth type</span>
-              <span className="account-type-value-edit-group">
-                <span className="account-type-value">
-                  {strategySummary(account.strategy)}
-                </span>
-                {account.strategy.mode === 'monthly_end_compound' ? (
+                  <input
+                    className="input account-fidelity-name-input"
+                    value={nameDraft}
+                    onChange={(e) => setNameDraft(e.target.value)}
+                    aria-label="Account name"
+                  />
+                  <button type="submit" className="btn secondary btn-compact">
+                    Save
+                  </button>
                   <button
                     type="button"
-                    className="btn link account-type-edit"
-                    onClick={openStrategyModal}
-                    aria-label="Edit month-end rates"
+                    className="btn link"
+                    onClick={() => setEditingName(false)}
                   >
-                    Edit rates
+                    Cancel
                   </button>
-                ) : null}
-              </span>
-            </p>
-          </>
-        )}
-        {kid && (
-          <p className="account-type-line">
-            <span className="account-type-label">Owner</span>
-            <span className="account-type-value">{kid.name}</span>
-          </p>
-        )}
-        <p className="account-type-line">
-          <span className="account-type-label">Started</span>
-          <span className="account-type-value">
-            {formatRecordedDate(metrics.startDate)}
-          </span>
-        </p>
-        {deposits.length === 0 && (
-          <p className="muted small account-started-hint">
-            Growth accrues from the first ledger date. Use{' '}
-            <strong>Deposit</strong> under Deposits and withdrawals or add from{' '}
-            {kid ? (
-              <Link to={`/kids/${kid.id}`}>{kid.name}’s page</Link>
-            ) : (
-              'the child’s page'
-            )}{' '}
-            to start.
-          </p>
-        )}
-        <div
-          className="account-value-stats"
-          role="group"
-          aria-label="Account value breakdown"
-        >
-          <div className="account-stat account-stat-highlight">
-            <span className="account-stat-label">Total account value</span>
-            <span className="account-stat-value">
-              {formatUsd(metrics.totalValueCents)}
-            </span>
+                </form>
+              ) : (
+                <div className="account-fidelity-name-row">
+                  <h1 className="account-fidelity-name">{account.name}</h1>
+                  <button
+                    type="button"
+                    className="account-fidelity-name-edit"
+                    onClick={() => {
+                      setNameDraft(account.name)
+                      setEditingName(true)
+                    }}
+                    aria-label={`Edit account name (${account.name})`}
+                  >
+                    Edit name
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="account-stat">
-            <span className="account-stat-label">Deposits</span>
-            <span className="account-stat-value">
+          {account.strategy.mode === 'monthly_end_compound' ? (
+            <button
+              type="button"
+              className="btn secondary btn-compact account-fidelity-head-action"
+              onClick={openStrategyModal}
+            >
+              Edit rates
+            </button>
+          ) : null}
+        </div>
+
+        <div className="account-fidelity-balance-block">
+          <p className="account-fidelity-balance-label">Account value</p>
+          <p className="account-fidelity-balance">
+            {formatUsd(metrics.totalValueCents)}
+          </p>
+          <p className={`account-fidelity-change ${growthClass}`}>
+            <span className="account-fidelity-change-label">Total growth</span>
+            <span className="account-fidelity-change-value">
+              {formatUsd(metrics.growthCents)}
+            </span>
+          </p>
+        </div>
+
+        <dl className="account-fidelity-meta">
+          {kid ? (
+            <div className="account-fidelity-meta-item">
+              <dt>Owner</dt>
+              <dd>
+                <Link to={`/kids/${kid.id}`}>{kid.name}</Link>
+              </dd>
+            </div>
+          ) : null}
+          <div className="account-fidelity-meta-item">
+            <dt>Growth</dt>
+            <dd>{strategySummary(account.strategy)}</dd>
+          </div>
+          <div className="account-fidelity-meta-item">
+            <dt>Opened</dt>
+            <dd>{formatRecordedDate(metrics.startDate)}</dd>
+          </div>
+        </dl>
+
+        <div
+          className="account-fidelity-metrics"
+          role="group"
+          aria-label="Cash flows and growth"
+        >
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Deposits</span>
+            <span className="account-fidelity-metric-value">
               {formatUsd(metrics.totalDepositsInCents)}
             </span>
           </div>
-          <div className="account-stat">
-            <span className="account-stat-label">Withdrawals</span>
-            <span className="account-stat-value">
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Withdrawals</span>
+            <span className="account-fidelity-metric-value">
               {formatUsd(-metrics.totalWithdrawalsCents)}
             </span>
           </div>
-          <div className="account-stat">
-            <span className="account-stat-label">Total growth</span>
+          <div className="account-fidelity-metric">
+            <span className="account-fidelity-metric-label">Net growth</span>
             <span
-              className={
-                'account-stat-value' +
-                (metrics.growthCents > 0
-                  ? ' account-stat-value-growth-positive'
-                  : metrics.growthCents < 0
-                    ? ' account-stat-value-growth-negative'
-                    : '')
-              }
+              className={`account-fidelity-metric-value ${growthClass}`}
             >
               {formatUsd(metrics.growthCents)}
             </span>
           </div>
         </div>
-      </header>
 
-      {account.strategy.mode !== 'piggy_bank' ? (
-        <AccountGrowthChart account={account} deposits={deposits} />
-      ) : null}
+        {deposits.length === 0 ? (
+          <p className="account-fidelity-empty-hint">
+            Record a deposit under <strong>Activity</strong> to start growth
+            from today, or add from{' '}
+            {kid ? (
+              <Link to={`/kids/${kid.id}`}>{kid.name}&apos;s page</Link>
+            ) : (
+              'the child&apos;s page'
+            )}
+            .
+          </p>
+        ) : null}
+      </section>
 
-      <section className="card deposit-section">
-        <div className="deposit-section-head">
-          <h2 className="card-title deposit-section-title">
-            Deposits and withdrawals
-          </h2>
-          <div className="deposit-section-actions">
-            <button
-              type="button"
-              className="btn primary btn-compact"
-              onClick={() => openLedgerModal('deposit')}
-            >
-              Deposit
-            </button>
-            <button
-              type="button"
-              className="btn secondary btn-compact"
-              onClick={() => openLedgerModal('withdrawal')}
-            >
-              Withdraw
-            </button>
+      <div className="account-fidelity-panels">
+        {account.strategy.mode !== 'piggy_bank' ? (
+          <AccountGrowthChart account={account} deposits={deposits} />
+        ) : null}
+
+        <section className="account-fidelity-panel account-fidelity-activity">
+          <div className="account-fidelity-panel-head deposit-section-head">
+            <div className="account-fidelity-panel-head-copy">
+              <h2 className="account-fidelity-panel-title">Activity</h2>
+              <p className="account-fidelity-panel-lede">
+                Deposits and withdrawals by month — parent-controlled ledger.
+              </p>
+            </div>
+            <div className="deposit-section-actions account-fidelity-activity-actions">
+              <button
+                type="button"
+                className="btn primary btn-compact"
+                onClick={() => openLedgerModal('deposit')}
+              >
+                Deposit
+              </button>
+              <button
+                type="button"
+                className="btn secondary btn-compact account-fidelity-btn-outline"
+                onClick={() => openLedgerModal('withdrawal')}
+              >
+                Withdraw
+              </button>
+            </div>
           </div>
-        </div>
-        <p className="muted small deposit-section-lede">
-          Record money in or out. The table shows the most recent three months
-          by default; use the actions below to load more or change the range.
-          Optional notes help you remember the source (e.g. Tooth Fairy) or why
-          cash left the account.
-        </p>
         {deposits.length === 0 ? (
           <p className="muted">
             Nothing recorded yet — use <strong>Deposit</strong> or{' '}
@@ -712,7 +718,16 @@ export function AccountPage() {
             deleteDeposit={deleteDeposit}
           />
         )}
-      </section>
+        </section>
+      </div>
+
+      {kid ? (
+        <CloseAccountSection
+          account={account}
+          kid={kid}
+          onClosed={() => navigate(`/kids/${kid.id}`)}
+        />
+      ) : null}
 
       <dialog
         ref={strategyDialogRef}

@@ -1,10 +1,9 @@
-# Fetches free SPY.US daily prices from Stooq (S&P 500 ETF proxy) and commits
-# close-to-close returns for the teaching simulator. No API key.
+# Fetches SPY daily prices from Stooq (requires STOOQ_API_KEY repo secret).
 name: Update SPY daily returns
 
 on:
   schedule:
-    # Weekday mornings UTC — picks up prior US close after Stooq update
+    # Weekday mornings UTC — picks up prior US close
     - cron: '35 5 * * 1-5'
   workflow_dispatch:
 
@@ -22,6 +21,8 @@ jobs:
           node-version: '22'
 
       - name: Fetch and write sp500-daily-returns.json
+        env:
+          STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
         run: node scripts/fetch-sp500-daily.mjs
 
       - uses: stefanzweifel/git-auto-commit-action@v5

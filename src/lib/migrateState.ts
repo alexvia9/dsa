@@ -1,6 +1,7 @@
-import type { DepositRecord, DsaState } from '../types/dsa'
+import type { DepositRecord, DsaState, Kid } from '../types/dsa'
 import { applyGrowthSimulationToState } from './accountGrowth'
 import { toCanonicalLocalYmd } from './dateLocal'
+import { normalizeAvatarColorId } from './kidAvatarColors'
 import { normalizeLedgerNote } from './ledger'
 
 export function normalizeDepositRecord(raw: unknown): DepositRecord {
@@ -26,9 +27,23 @@ export function normalizeDepositRecord(raw: unknown): DepositRecord {
   }
 }
 
+function normalizeKid(raw: unknown, index: number): Kid {
+  const r = raw && typeof raw === 'object' ? (raw as Partial<Kid>) : {}
+  return {
+    id: typeof r.id === 'string' && r.id ? r.id : crypto.randomUUID(),
+    name: typeof r.name === 'string' ? r.name.trim() : '',
+    avatarColor: normalizeAvatarColorId(r.avatarColor, index),
+    createdAt:
+      typeof r.createdAt === 'string' && r.createdAt
+        ? r.createdAt
+        : new Date().toISOString(),
+  }
+}
+
 function normalizeDsaState(state: DsaState): DsaState {
   return {
     ...state,
+    kids: state.kids.map((k, i) => normalizeKid(k, i)),
     deposits: state.deposits.map((d) => normalizeDepositRecord(d)),
   }
 }

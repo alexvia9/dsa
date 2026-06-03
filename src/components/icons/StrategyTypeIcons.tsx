@@ -1,83 +1,79 @@
-import type { JSX } from 'react'
+/**
+ * Account-type icons — Lucide geometry (ISC), unified 2px stroke.
+ * @see https://lucide.dev
+ */
+import type { JSX, ReactNode, SVGProps } from 'react'
 import type { InvestmentStrategy } from '../../types/dsa'
 
 type StrategyMode = InvestmentStrategy['mode']
 
-const svgProps = {
+const strokeIconProps: SVGProps<SVGSVGElement> = {
   viewBox: '0 0 24 24',
-  fill: 'none' as const,
+  fill: 'none',
   stroke: 'currentColor',
   strokeWidth: 2,
-  strokeLinecap: 'round' as const,
-  strokeLinejoin: 'round' as const,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
 }
 
-/**
- * Piggy bank — front-facing pig: chubby head, big floppy ears, wide snout,
- * bold eyes (optimized for 24px stroke icons).
- */
-function IconPig() {
+function StrokeIcon({ children }: { children: ReactNode }) {
   return (
-    <svg {...svgProps} aria-hidden>
-      <ellipse cx="12" cy="12.85" rx="7.5" ry="6.65" />
-      <path d="M5.35 10.5Q4.25 5.75 7.6 4.85Q10.15 4.2 10.35 8.65" />
-      <path d="M18.65 10.5Q19.75 5.75 16.4 4.85Q13.85 4.2 13.65 8.65" />
-      <ellipse cx="12" cy="17.05" rx="4.35" ry="2.9" />
-      <circle cx="8.35" cy="11.4" r="1.15" fill="currentColor" stroke="none" />
-      <circle cx="15.65" cy="11.4" r="1.15" fill="currentColor" stroke="none" />
-      <circle cx="10.15" cy="17.05" r="0.52" fill="currentColor" stroke="none" />
-      <circle cx="13.85" cy="17.05" r="0.52" fill="currentColor" stroke="none" />
+    <svg {...strokeIconProps} aria-hidden>
+      {children}
     </svg>
   )
 }
 
-/**
- * Standard savings (APY) — leaf: steady, organic growth (fits slow, smooth
- * savings / APY teaching).
- */
-function IconLeafGrowth() {
+function IconPiggyBank() {
   return (
-    <svg {...svgProps} aria-hidden>
-      <path d="M12 22V13" />
-      <path d="M12 4C8 7 5 11 5 15c0 3.5 2.5 6 7 7 4.5-1 7-3.5 7-7 0-4-3-8-7-11z" />
-    </svg>
+    <StrokeIcon>
+      <path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2V5z" />
+      <path d="M2 9v1c0 1.1.9 2 2 2h1" />
+      <path d="M16 11h.01" />
+    </StrokeIcon>
   )
 }
 
-/** Month-end compound — calendar grid (growth is tied to each month-end). */
-function IconCalendarMonth() {
+function IconSavings() {
   return (
-    <svg {...svgProps} aria-hidden>
-      <rect x="3" y="5" width="18" height="16" rx="2" />
+    <StrokeIcon>
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+    </StrokeIcon>
+  )
+}
+
+function IconMonthEnd() {
+  return (
+    <StrokeIcon>
+      <path d="M8 2v4" />
+      <path d="M16 2v4" />
+      <rect width="18" height="18" x="3" y="4" rx="2" />
       <path d="M3 10h18" />
-      <path d="M8 3v4M16 3v4" />
-      <circle cx="8" cy="14.5" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="14.5" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="16" cy="14.5" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="8" cy="18" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="18" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
+      <path d="M8 14h.01" />
+      <path d="M12 14h.01" />
+      <path d="M16 14h.01" />
+      <path d="M8 18h.01" />
+      <path d="M12 18h.01" />
+      <path d="M16 18h.01" />
+    </StrokeIcon>
   )
 }
 
-/**
- * Market index — trending line (markets move around, long-run “zoom out”
- * framing).
- */
-function IconMarketChart() {
+function IconMarketIndex() {
   return (
-    <svg {...svgProps} aria-hidden>
-      <path d="M3 21h18" />
-      <polyline points="4 17 8 12 12 14.5 16 7 20 10" />
-    </svg>
+    <StrokeIcon>
+      <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+      <path d="m19 9-5 5-4-4-3 3" />
+    </StrokeIcon>
   )
 }
 
 const ICON_BY_MODE: Record<StrategyMode, () => JSX.Element> = {
-  piggy_bank: IconPig,
-  savings_apr: IconLeafGrowth,
-  monthly_end_compound: IconCalendarMonth,
-  stock_market: IconMarketChart,
+  piggy_bank: IconPiggyBank,
+  savings_apr: IconSavings,
+  monthly_end_compound: IconMonthEnd,
+  stock_market: IconMarketIndex,
 }
 
 export function StrategyTypeCardIcon({ mode }: { mode: StrategyMode }) {

@@ -13,8 +13,8 @@ export function seedState(): DsaState {
 
   return {
     kids: [
-      { id: kidA, name: 'Alex', createdAt: t },
-      { id: kidB, name: 'Sam', createdAt: t },
+      { id: kidA, name: 'Alex', avatarColor: 'green', createdAt: t },
+      { id: kidB, name: 'Sam', avatarColor: 'indigo', createdAt: t },
     ],
     accounts: [
       {

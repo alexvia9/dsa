@@ -4,13 +4,16 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
 import { seedState } from '../data/seed'
 import { localDateString, toCanonicalLocalYmd } from '../lib/dateLocal'
 import { applyGrowthSimulationToState } from '../lib/accountGrowth'
-import { setSp500DailyReturns } from '../lib/sp500Market'
+import {
+  refreshSp500MarketData,
+} from '../lib/refreshSp500Market'
 import { reconcileBalancesFromDeposits } from '../lib/migrateState'
 import { loadState, saveState } from '../lib/storage'
 import { fetchDsaState, pushDsaState } from '../lib/supabase/dsaSync'
@@ -24,23 +27,34 @@ import type {
 } from '../types/dsa'
 import { defaultStrategy } from '../types/dsa'
 import { normalizeLedgerNote } from '../lib/ledger'
+import { transferFromAccountNote } from '../lib/transferFromAccountNote'
+import {
+  defaultAvatarColorForIndex,
+  type KidAvatarColorId,
+} from '../lib/kidAvatarColors'
+
+type CloudLoadStatus = 'local' | 'loading' | 'ready' | 'error'
 
 type DsaContextValue = {
   state: DsaState
-  /** False while loading the first cloud snapshot after sign-in. */
+  /** False while pulling the initial cloud snapshot after sign-in. */
   remoteHydrated: boolean
+  /** Cloud fetch failed — app will not push (avoids wiping remote data). */
+  cloudLoadStatus: CloudLoadStatus
+  retryCloudLoad: () => void
   kidById: Map<string, Kid>
   accountById: Map<string, Account>
   accountsForKid: (kidId: string) => Account[]
   depositsForAccount: (accountId: string) => DepositRecord[]
   familyTotalCents: number
-  addKid: (name: string) => void
+  addKid: (name: string, avatarColor?: KidAvatarColorId) => string | null
   addAccount: (
     kidId: string,
     name: string,
     opts?: { strategy?: InvestmentStrategy; openingDepositCents?: number },
   ) => string | null
   renameKid: (kidId: string, name: string) => void
+  setKidAvatarColor: (kidId: string, avatarColor: KidAvatarColorId) => void
   renameAccount: (accountId: string, name: string) => void
   deposit: (
     accountId: string,
@@ -61,6 +75,13 @@ type DsaContextValue = {
     },
   ) => void
   deleteDeposit: (depositId: string) => void
+  closeAccount: (accountId: string) => boolean
+  transferBetweenAccounts: (
+    sourceAccountId: string,
+    targetAccountId: string,
+    amountCents: number,
+  ) => boolean
+  closeKid: (kidId: string) => boolean
   setStrategy: (accountId: string, strategy: InvestmentStrategy) => void
 }
 
@@ -86,80 +107,97 @@ export function DsaProvider({
   const [state, setState] = useState<DsaState>(() =>
     remoteUserId ? emptyDsaState() : initialLocalState(),
   )
-  const [hydrated, setHydrated] = useState(remoteUserId === null)
+  const [cloudLoadStatus, setCloudLoadStatus] = useState<CloudLoadStatus>(() =>
+    remoteUserId ? 'loading' : 'local',
+  )
+  /** True after the first successful cloud pull for the current user. */
+  const cloudPullDoneRef = useRef(false)
+  const marketRefreshGenRef = useRef(0)
 
-  const remoteHydrated = remoteUserId === null ? true : hydrated
+  const remoteHydrated =
+    cloudLoadStatus === 'local' ||
+    cloudLoadStatus === 'ready' ||
+    cloudLoadStatus === 'error'
 
-  useEffect(() => {
-    if (!remoteUserId) return
-
-    let cancelled = false
-
-    fetchDsaState(remoteUserId)
-      .then((remote) => {
-        if (cancelled) return
-        setState(reconcileBalancesFromDeposits(remote))
-        setHydrated(true)
-      })
-      .catch((err) => {
-        console.error('[DSA] Failed to load cloud state', err)
-        if (!cancelled) {
-          setState(emptyDsaState())
-          setHydrated(true)
-        }
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [remoteUserId])
-
-  useEffect(() => {
-    const url = `${import.meta.env.BASE_URL}market/sp500-daily-returns.json`
-    let cancelled = false
-    fetch(url)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((j: unknown) => {
-        if (cancelled) return
-        const ret =
-          j &&
-          typeof j === 'object' &&
-          'returns' in j &&
-          j.returns &&
-          typeof j.returns === 'object'
-            ? (j.returns as Record<string, number>)
-            : null
-        setSp500DailyReturns(ret)
-      })
-      .catch(() => {
-        // Keep bundled seed data on network/base-URL failure; do not clear returns.
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setState((s) => applyGrowthSimulationToState(s))
-        }
-      })
-    return () => {
-      cancelled = true
-    }
+  const fetchRemoteState = useCallback(async (userId: string) => {
+    const remote = await fetchDsaState(userId)
+    return reconcileBalancesFromDeposits(remote)
   }, [])
 
   useEffect(() => {
-    if (!remoteHydrated) return
+    if (!remoteUserId) {
+      cloudPullDoneRef.current = false
+      return
+    }
+
+    cloudPullDoneRef.current = false
     let cancelled = false
-    const frame = requestAnimationFrame(() => {
-      if (!cancelled) {
-        setState((s) => applyGrowthSimulationToState(s))
-      }
-    })
+
+    fetchRemoteState(remoteUserId)
+      .then((remote) => {
+        if (cancelled) return
+        setState(remote)
+        setCloudLoadStatus('ready')
+        cloudPullDoneRef.current = true
+      })
+      .catch((err) => {
+        console.error('[DSA] Failed to load cloud state', err)
+        if (!cancelled) setCloudLoadStatus('error')
+      })
+
     return () => {
       cancelled = true
-      cancelAnimationFrame(frame)
     }
-  }, [remoteHydrated])
+  }, [remoteUserId, fetchRemoteState])
+
+  const retryCloudLoad = useCallback(() => {
+    if (!remoteUserId) return
+    setCloudLoadStatus('loading')
+    cloudPullDoneRef.current = false
+    fetchRemoteState(remoteUserId)
+      .then((remote) => {
+        setState(remote)
+        setCloudLoadStatus('ready')
+        cloudPullDoneRef.current = true
+      })
+      .catch((err) => {
+        console.error('[DSA] Failed to load cloud state', err)
+        setCloudLoadStatus('error')
+      })
+  }, [remoteUserId, fetchRemoteState])
+
+  const refreshMarketData = useCallback(() => {
+    const gen = ++marketRefreshGenRef.current
+    void refreshSp500MarketData({ tryLive: true }).then(() => {
+      if (marketRefreshGenRef.current !== gen) return
+      setState((s) => applyGrowthSimulationToState(s))
+    })
+  }, [])
+
+  const marketAccountIdsKey = useMemo(
+    () =>
+      state.accounts
+        .filter((a) => a.strategy.mode === 'stock_market')
+        .map((a) => a.id)
+        .sort()
+        .join(','),
+    [state.accounts],
+  )
 
   useEffect(() => {
-    if (!remoteHydrated || !remoteUserId) return
+    if (!remoteHydrated || !marketAccountIdsKey) return
+    refreshMarketData()
+    // Intentionally omit state.accounts — balances must not retrigger fetches.
+  }, [remoteHydrated, marketAccountIdsKey, refreshMarketData])
+
+  useEffect(() => {
+    if (
+      !cloudPullDoneRef.current ||
+      cloudLoadStatus !== 'ready' ||
+      !remoteUserId
+    ) {
+      return
+    }
     let cancelled = false
     const t = setTimeout(() => {
       if (!cancelled) {
@@ -172,12 +210,12 @@ export function DsaProvider({
       cancelled = true
       clearTimeout(t)
     }
-  }, [state, remoteHydrated, remoteUserId])
+  }, [state, cloudLoadStatus, remoteUserId])
 
   useEffect(() => {
-    if (!remoteHydrated || remoteUserId) return
+    if (cloudLoadStatus !== 'local') return
     saveState(state)
-  }, [state, remoteHydrated, remoteUserId])
+  }, [state, cloudLoadStatus, remoteUserId])
 
   const kidById = useMemo(
     () => new Map(state.kids.map((k) => [k.id, k])),
@@ -212,15 +250,20 @@ export function DsaProvider({
     [state.accounts],
   )
 
-  const addKid = useCallback((name: string) => {
+  const addKid = useCallback((name: string, avatarColor?: KidAvatarColorId) => {
     const trimmed = name.trim()
-    if (!trimmed) return
-    const kid: Kid = {
-      id: crypto.randomUUID(),
-      name: trimmed,
-      createdAt: new Date().toISOString(),
-    }
-    setState((s) => ({ ...s, kids: [...s.kids, kid] }))
+    if (!trimmed) return null
+    const id = crypto.randomUUID()
+    setState((s) => {
+      const kid: Kid = {
+        id,
+        name: trimmed,
+        avatarColor: avatarColor ?? defaultAvatarColorForIndex(s.kids.length),
+        createdAt: new Date().toISOString(),
+      }
+      return { ...s, kids: [...s.kids, kid] }
+    })
+    return id
   }, [])
 
   const addAccount = useCallback(
@@ -255,15 +298,19 @@ export function DsaProvider({
             createdAt: now,
           })
         }
-        return applyGrowthSimulationToState({
+        const next = applyGrowthSimulationToState({
           ...s,
           accounts: [...s.accounts, account],
           deposits,
         })
+        if (account.strategy.mode === 'stock_market') {
+          refreshMarketData()
+        }
+        return next
       })
       return id
     },
-    [kidById],
+    [kidById, refreshMarketData],
   )
 
   const renameKid = useCallback((kidId: string, name: string) => {
@@ -274,6 +321,18 @@ export function DsaProvider({
       kids: s.kids.map((k) => (k.id === kidId ? { ...k, name: trimmed } : k)),
     }))
   }, [])
+
+  const setKidAvatarColor = useCallback(
+    (kidId: string, avatarColor: KidAvatarColorId) => {
+      setState((s) => ({
+        ...s,
+        kids: s.kids.map((k) =>
+          k.id === kidId ? { ...k, avatarColor } : k,
+        ),
+      }))
+    },
+    [],
+  )
 
   const renameAccount = useCallback((accountId: string, name: string) => {
     const trimmed = name.trim()
@@ -389,6 +448,90 @@ export function DsaProvider({
     })
   }, [])
 
+  const closeAccount = useCallback((accountId: string) => {
+    let closed = false
+    setState((s) => {
+      if (!s.accounts.some((a) => a.id === accountId)) return s
+      closed = true
+      return applyGrowthSimulationToState({
+        ...s,
+        accounts: s.accounts.filter((a) => a.id !== accountId),
+        deposits: s.deposits.filter((d) => d.accountId !== accountId),
+      })
+    })
+    return closed
+  }, [])
+
+  const transferBetweenAccounts = useCallback(
+    (
+      sourceAccountId: string,
+      targetAccountId: string,
+      amountCents: number,
+    ) => {
+      let ok = false
+      setState((s) => {
+        const source = s.accounts.find((a) => a.id === sourceAccountId)
+        const target = s.accounts.find((a) => a.id === targetAccountId)
+        if (!source || !target || source.id === target.id) return s
+
+        const amount = Math.round(amountCents)
+        if (amount <= 0 || amount > source.balanceCents) return s
+
+        const now = new Date().toISOString()
+        const recordedAt = localDateString()
+        const note = normalizeLedgerNote(
+          transferFromAccountNote(source.name),
+        )
+
+        ok = true
+        return applyGrowthSimulationToState({
+          ...s,
+          deposits: [
+            ...s.deposits,
+            {
+              id: crypto.randomUUID(),
+              accountId: sourceAccountId,
+              kind: 'withdrawal' as const,
+              amountCents: amount,
+              note,
+              recordedAt,
+              createdAt: now,
+            },
+            {
+              id: crypto.randomUUID(),
+              accountId: targetAccountId,
+              kind: 'deposit' as const,
+              amountCents: amount,
+              note,
+              recordedAt,
+              createdAt: now,
+            },
+          ],
+        })
+      })
+      return ok
+    },
+    [],
+  )
+
+  const closeKid = useCallback((kidId: string) => {
+    let closed = false
+    setState((s) => {
+      if (!s.kids.some((k) => k.id === kidId)) return s
+      closed = true
+      const accountIds = new Set(
+        s.accounts.filter((a) => a.kidId === kidId).map((a) => a.id),
+      )
+      return applyGrowthSimulationToState({
+        ...s,
+        kids: s.kids.filter((k) => k.id !== kidId),
+        accounts: s.accounts.filter((a) => a.kidId !== kidId),
+        deposits: s.deposits.filter((d) => !accountIds.has(d.accountId)),
+      })
+    })
+    return closed
+  }, [])
+
   const setStrategy = useCallback(
     (accountId: string, strategy: InvestmentStrategy) => {
       setState((s) =>
@@ -407,6 +550,8 @@ export function DsaProvider({
     () => ({
       state,
       remoteHydrated,
+      cloudLoadStatus,
+      retryCloudLoad,
       kidById,
       accountById,
       accountsForKid,
@@ -415,15 +560,21 @@ export function DsaProvider({
       addKid,
       addAccount,
       renameKid,
+      setKidAvatarColor,
       renameAccount,
       deposit,
       updateDeposit,
       deleteDeposit,
+      closeAccount,
+      transferBetweenAccounts,
+      closeKid,
       setStrategy,
     }),
     [
       state,
       remoteHydrated,
+      cloudLoadStatus,
+      retryCloudLoad,
       kidById,
       accountById,
       accountsForKid,
@@ -432,10 +583,14 @@ export function DsaProvider({
       addKid,
       addAccount,
       renameKid,
+      setKidAvatarColor,
       renameAccount,
       deposit,
       updateDeposit,
       deleteDeposit,
+      closeAccount,
+      transferBetweenAccounts,
+      closeKid,
       setStrategy,
     ],
   )

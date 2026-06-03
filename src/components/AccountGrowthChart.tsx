@@ -9,6 +9,7 @@ import {
 import { localDateString } from '../lib/dateLocal'
 import { formatUsd } from '../lib/money'
 import { strategyGrowthBasisLine } from '../lib/strategyLabel'
+import { PerformanceAiInsight } from './PerformanceAiInsight'
 
 const PRESETS: { id: GrowthChartRange; label: string }[] = [
   { id: '1m', label: '1m' },
@@ -146,11 +147,15 @@ export function AccountGrowthChart({ account, deposits }: Props) {
   const modeClass = `account-growth-chart-card--${account.strategy.mode}`
 
   return (
-    <section className={`card account-growth-chart-card ${modeClass}`}>
-      <div className="account-growth-chart-head">
-        <h2 className="card-title account-growth-chart-title">Growth over time</h2>
+    <section
+      className={`account-fidelity-panel account-growth-chart-card ${modeClass}`}
+    >
+      <div className="account-growth-chart-head account-fidelity-panel-head">
+        <h2 className="account-fidelity-panel-title account-growth-chart-title">
+          Performance
+        </h2>
         <div
-          className="account-growth-range-toggle"
+          className="account-growth-range-toggle account-fidelity-range-toggle"
           role="group"
           aria-label="Chart time range"
         >
@@ -160,8 +165,8 @@ export function AccountGrowthChart({ account, deposits }: Props) {
               type="button"
               className={
                 range === id
-                  ? 'btn secondary btn-compact account-growth-range-btn is-active'
-                  : 'btn secondary btn-compact account-growth-range-btn'
+                  ? 'account-fidelity-range-btn is-active'
+                  : 'account-fidelity-range-btn'
               }
               onClick={() => setRange(id)}
             >
@@ -170,7 +175,7 @@ export function AccountGrowthChart({ account, deposits }: Props) {
           ))}
         </div>
       </div>
-      <p className="muted small account-growth-chart-caption">
+      <p className="account-growth-chart-caption account-fidelity-panel-lede">
         End-of-day balance for each date. The range is a full month, three months,
         or one year ending <strong>today</strong>. Days before your first ledger
         entry show <strong>$0</strong>.
@@ -217,6 +222,15 @@ export function AccountGrowthChart({ account, deposits }: Props) {
           <strong>Based on:</strong> {basisLine}
         </p>
       </div>
+      <PerformanceAiInsight
+        account={account}
+        deposits={deposits}
+        range={range}
+        windowFromYmd={windowBreakdown.windowFromYmd}
+        windowToYmd={windowBreakdown.windowToYmd}
+        growthInWindowCents={windowBreakdown.growthInWindowCents}
+        netFlowInWindowCents={windowBreakdown.netFlowInWindowCents}
+      />
       <div className="account-growth-chart-svg-wrap">
         <svg
           className="account-growth-chart-svg"
