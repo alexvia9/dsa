@@ -16,6 +16,7 @@ import {
 } from '../lib/refreshSp500Market'
 import { reconcileBalancesFromDeposits } from '../lib/migrateState'
 import { loadState, saveState } from '../lib/storage'
+import { promiseWithTimeout } from '../lib/promiseWithTimeout'
 import { fetchDsaState, pushDsaState } from '../lib/supabase/dsaSync'
 import type {
   Account,
@@ -34,6 +35,8 @@ import {
 } from '../lib/kidAvatarColors'
 
 type CloudLoadStatus = 'local' | 'loading' | 'ready' | 'error'
+
+const CLOUD_FETCH_TIMEOUT_MS = 15_000
 
 type DsaContextValue = {
   state: DsaState
@@ -124,7 +127,11 @@ export function DsaProvider({
     cloudLoadStatus === 'error'
 
   const fetchRemoteState = useCallback(async (userId: string) => {
-    const remote = await fetchDsaState(userId)
+    const remote = await promiseWithTimeout(
+      fetchDsaState(userId),
+      CLOUD_FETCH_TIMEOUT_MS,
+      'Cloud load timed out',
+    )
     return reconcileBalancesFromDeposits(remote)
   }, [])
 

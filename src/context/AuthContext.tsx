@@ -7,13 +7,18 @@ import {
   type ReactNode,
 } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { promiseWithTimeout } from '../lib/promiseWithTimeout'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 type AuthModalMode = 'signIn' | 'signUp'
 
+const AUTH_SESSION_TIMEOUT_MS = 10_000
+
 type AuthContextValue = {
   session: Session | null
   loading: boolean
+  /** Set when the initial session check fails (e.g. Supabase unreachable). */
+  authInitError: string | null
   authModalOpen: boolean
   authModalMode: AuthModalMode
   openAuthModal: (mode?: AuthModalMode) => void
@@ -28,6 +33,7 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(() => isSupabaseConfigured())
+  const [authInitError, setAuthInitError] = useState<string | null>(null)
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('signIn')
 
@@ -47,12 +53,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const supabase = getSupabase()!
     let cancelled = false
 
-    supabase.auth.getSession().then(({ data: { session: s } }) => {
-      if (!cancelled) {
+    void promiseWithTimeout(
+      supabase.auth.getSession(),
+      AUTH_SESSION_TIMEOUT_MS,
+      'Cloud sign-in check timed out',
+    )
+      .then(({ data: { session: s } }) => {
+        if (cancelled) return
         setSession(s)
-        setLoading(false)
-      }
-    })
+        setAuthInitError(null)
+      })
+      .catch((err) => {
+        console.error('[DSA] Auth session check failed', err)
+        if (!cancelled) {
+          setAuthInitError(
+            'Could not reach cloud sign-in. Your Supabase project may be paused, deleted, or misconfigured.',
+          )
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
 
     const {
       data: { subscription },
@@ -109,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       session,
       loading,
+      authInitError,
       authModalOpen,
       authModalMode,
       openAuthModal,
@@ -120,6 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [
       session,
       loading,
+      authInitError,
       authModalOpen,
       authModalMode,
       openAuthModal,

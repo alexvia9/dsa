@@ -65,13 +65,26 @@ function ProtectedShell() {
 }
 
 function AppRoutes() {
-  const { loading } = useAuth()
+  const { loading, authInitError } = useAuth()
   const configured = isSupabaseConfigured()
 
   if (configured && loading) {
     return (
       <div className="app-boot">
         <p className="app-boot-text muted">Loading…</p>
+      </div>
+    )
+  }
+
+  if (configured && authInitError) {
+    return (
+      <div className="app-boot">
+        <p className="app-boot-text">{authInitError}</p>
+        <p className="muted small app-boot-detail">
+          Check that your Supabase project is active and that{' '}
+          <code>VITE_SUPABASE_URL</code> in GitHub Actions secrets matches the
+          project URL in the Supabase dashboard.
+        </p>
       </div>
     )
   }
