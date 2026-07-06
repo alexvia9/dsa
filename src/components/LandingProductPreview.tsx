@@ -95,12 +95,12 @@ export function LandingProductPreview() {
     <div className="landing-preview" aria-hidden>
       <div className="landing-preview-device">
         <div className="landing-preview-topbar">
-          <span className="landing-preview-topbar-title">Family overview</span>
-          <span className="landing-preview-topbar-badge">Live</span>
+          <span className="landing-preview-topbar-title">Kids at a glance</span>
+          <span className="landing-preview-topbar-badge">Synced</span>
         </div>
 
         <div className="landing-preview-balance-card">
-          <p className="landing-preview-label">Household balance</p>
+          <p className="landing-preview-label">Total tracked</p>
           <p className="landing-preview-balance">$2,847.52</p>
           <div className="landing-preview-balance-meta">
             <span className="landing-preview-change positive">+$48.12</span>

@@ -22,31 +22,31 @@ const PRODUCT_SPECS: Record<
   InvestmentStrategy['mode'],
   { spec: string; tag: string }
 > = {
-  piggy_bank: { spec: '0% · cash only', tag: 'Spending' },
-  savings_apr: { spec: 'Fixed APY · daily accrual', tag: 'Savings' },
-  monthly_end_compound: { spec: 'Custom % · month-end', tag: 'Goals' },
-  stock_market: { spec: 'S&P 500 · SPY daily', tag: 'Investing' },
+  piggy_bank: { spec: '0% · cash only', tag: 'Spend' },
+  savings_apr: { spec: 'Fixed APY · daily accrual', tag: 'Save' },
+  monthly_end_compound: { spec: 'Custom % · month-end', tag: 'Give' },
+  stock_market: { spec: 'S&P 500 · SPY daily', tag: 'Invest' },
 }
 
 const FEATURES = [
   {
-    title: 'Household dashboard',
-    body: 'See every child’s balances, accounts, and month-to-date change in one secure view.',
+    title: 'All jars in one view',
+    body: 'See spend, save, give, and invest for every child—no more counting cash across the counter or digging through envelopes.',
   },
   {
-    title: 'Parent-controlled ledger',
-    body: 'You record deposits, withdrawals, and notes—the same way a real custodial account works.',
+    title: 'Quick to update',
+    body: 'Log allowance or a purchase in seconds when money moves. Balances stay current without spreadsheets or mental math.',
   },
   {
-    title: 'Performance tracking',
-    body: 'Charts break out growth from new money so kids learn what the market and interest actually did.',
+    title: 'Growth, calculated for you',
+    body: 'Interest and market moves update automatically so you and your kids can see progress—not just the last deposit.',
   },
   {
     title: 'Sync across devices',
     bodyCloud:
-      'Sign in once; your family portfolio stays updated wherever you open DSA.',
+      'Sign in once; jar balances stay up to date on your phone or tablet.',
     bodyLocal:
-      'Connect Supabase to sync across phones, tablets, and laptops.',
+      'Connect Supabase to keep jar balances in sync across phones, tablets, and laptops.',
   },
 ] as const
 
@@ -78,7 +78,7 @@ export function LandingPage() {
           <DsaMonogram className="brand-monogram" />
           <span className="brand-text">
             <span className="brand-title">Dad Savings Account</span>
-            <span className="brand-tagline">Family brokerage</span>
+            <span className="brand-tagline">Kids&apos; money, one place</span>
           </span>
         </div>
         <nav className="site-nav" aria-label="Account">
@@ -96,7 +96,7 @@ export function LandingPage() {
                 className="btn primary btn-compact"
                 onClick={() => openAuthModal('signUp')}
               >
-                Open account
+                Get started
               </button>
             </>
           ) : (
@@ -111,17 +111,18 @@ export function LandingPage() {
         <section className="landing-hero">
           <div className="landing-hero-copy">
             <ul className="landing-trust-row" aria-label="Product highlights">
-              <li>Parent-controlled</li>
-              <li>Real market data</li>
-              <li>Private family ledger</li>
+              <li>Easy to track</li>
+              <li>No real money moved</li>
+              <li>Save · spend · give · invest</li>
             </ul>
             <h1 className="landing-headline">
-              The family investing experience kids can grow into
+              The simple way to track your kids&apos; money
             </h1>
             <p className="landing-lede">
-              DSA combines a Greenlight-style household view with
-              brokerage-grade account types—savings, goals, and market index
-              tracking—so you can teach money the way real accounts behave.
+              DSA replaces piggy banks and envelope jars with one clear view. You
+              still hold the cash—we just make it easier to see what each child
+              has for spending, saving, giving, and investing. A teaching tool
+              that saves you the hassle, not another account to manage.
             </p>
             <div className="landing-hero-actions">
               {cloud ? (
@@ -131,7 +132,7 @@ export function LandingPage() {
                     className="btn primary btn-lg"
                     onClick={() => openAuthModal('signUp')}
                   >
-                    Open family account
+                    Get started
                   </button>
                   <button
                     type="button"
@@ -148,7 +149,8 @@ export function LandingPage() {
               )}
             </div>
             <p className="landing-disclaimer-inline">
-              Simulation only — not a bank or registered broker-dealer.
+              Simulation only—you hold all real money. Nothing is moved or invested
+              through DSA.
             </p>
           </div>
           <LandingProductPreview />
@@ -156,10 +158,11 @@ export function LandingPage() {
 
         <section className="landing-section landing-section-features">
           <div className="landing-section-head">
-            <h2 className="landing-section-title">Built for real family money habits</h2>
+            <h2 className="landing-section-title">Less mess, more clarity</h2>
             <p className="landing-section-lede">
-              Structured like the apps parents already trust—without moving
-              actual funds.
+              Stop guessing jar balances. DSA keeps the numbers straight while you
+              stay in charge of the cash—no bank account, no extra apps moving
+              real dollars.
             </p>
           </div>
           <ul className="landing-feature-grid">
@@ -180,10 +183,10 @@ export function LandingPage() {
 
         <section className="landing-section">
           <div className="landing-section-head">
-            <h2 className="landing-section-title">Account products</h2>
+            <h2 className="landing-section-title">Four jars, zero clutter</h2>
             <p className="landing-section-lede">
-              Open multiple lines per child—the same icons, colors, and growth
-              rules you’ll see inside the app.
+              The same Moonjar or envelope split you already use—digital, per
+              child, and always easy to check.
             </p>
           </div>
           <ul className="strategy-type-card-grid landing-type-grid">
@@ -225,19 +228,19 @@ export function LandingPage() {
 
         <section className="landing-cta">
           <div className="landing-cta-inner">
-            <h2 className="landing-cta-title">Start your household portfolio</h2>
+            <h2 className="landing-cta-title">Know what each kid has—at a glance</h2>
             <p>
-              Set up children, choose account types, and track balances with
-              the same clarity you expect from a custodial brokerage—at your
-              kitchen table.
+              Set up jars in minutes. A quick update when allowance hits or they
+              spend keeps everyone on the same page—with room to teach along the
+              way.
             </p>
-            {cloud ? (
+              {cloud ? (
               <button
                 type="button"
                 className="btn primary btn-lg"
                 onClick={() => openAuthModal('signUp')}
               >
-                Open family account — free
+                Get started — free
               </button>
             ) : (
               <Link to="/family" className="btn primary btn-lg">
@@ -251,8 +254,9 @@ export function LandingPage() {
       <footer className="landing-footer">
         <p className="landing-footer-brand">Dad Savings Account</p>
         <p className="landing-footer-legal">
-          Teaching simulator only. Not financial advice, not FDIC insured, and
-          not affiliated with Greenlight, Fidelity, or any financial institution.
+          Teaching simulator only. You hold all real money; DSA does not. Not
+          financial advice, not FDIC insured, and not affiliated with any bank
+          or brokerage.
         </p>
       </footer>
     </div>
