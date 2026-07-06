@@ -8,8 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "update-sp500": "node scripts/fetch-sp500-daily.mjs",
-    "stooq-setup": "node scripts/stooq-setup.mjs"
+    "update-sp500": "node scripts/fetch-sp500-daily.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",

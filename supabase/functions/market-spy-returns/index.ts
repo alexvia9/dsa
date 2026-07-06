@@ -9,26 +9,26 @@ const corsHeaders = {
 const fetchUserAgent =
   'Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/alexvia9/dsa)'
 
-function returnsFromStooqCsv(csv: string): Record<string, number> | null {
-  const lines = csv.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
-  if (
-    lines.length < 2 ||
-    lines[0].includes('No data') ||
-    /apikey/i.test(lines[0])
-  ) {
-    return null
-  }
-  if (!lines[0].toLowerCase().startsWith('date')) return null
+const SOURCE =
+  'https://finance.yahoo.com/quote/SPY — SPY daily (S&P 500 ETF proxy; close-to-close)'
+
+function returnsFromYahooChart(json: unknown): Record<string, number> | null {
+  if (!json || typeof json !== 'object') return null
+  const chart = (json as { chart?: unknown }).chart
+  if (!chart || typeof chart !== 'object') return null
+  const result = (chart as { result?: unknown[] }).result?.[0]
+  if (!result || typeof result !== 'object') return null
+
+  const timestamps = (result as { timestamp?: number[] }).timestamp
+  const closes = (result as { indicators?: { quote?: { close?: (number | null)[] }[] } })
+    .indicators?.quote?.[0]?.close
+  if (!timestamps?.length || !closes?.length) return null
 
   const rows: { date: string; close: number }[] = []
-  for (let i = 1; i < lines.length; i++) {
-    const parts = lines[i].split(',')
-    if (parts.length < 5) continue
-    const date = parts[0]
-    const close = Number.parseFloat(parts[4])
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(close) || close <= 0) {
-      continue
-    }
+  for (let i = 0; i < timestamps.length; i++) {
+    const close = closes[i]
+    if (close == null || !Number.isFinite(close) || close <= 0) continue
+    const date = new Date(timestamps[i] * 1000).toISOString().slice(0, 10)
     rows.push({ date, close })
   }
   if (rows.length === 0) return null
@@ -50,44 +50,16 @@ serve(async (req) => {
     return new Response('ok', { headers: corsHeaders })
   }
 
-  const csvUrl = Deno.env.get('STOOQ_SPY_CSV_URL')?.trim()
-  const apikey = Deno.env.get('STOOQ_API_KEY')?.trim()
-  let stooqFetchUrl: string | null = null
-  if (csvUrl && /apikey=/i.test(csvUrl)) {
-    stooqFetchUrl = csvUrl
-  } else if (csvUrl) {
-    try {
-      const key = new URL(csvUrl).searchParams.get('apikey')?.trim()
-      if (key) {
-        stooqFetchUrl = `https://stooq.com/q/d/l/?s=spy.us&i=d&apikey=${encodeURIComponent(key)}`
-      }
-    } catch {
-      /* ignore */
-    }
-  } else if (apikey) {
-    stooqFetchUrl = `https://stooq.com/q/d/l/?s=spy.us&i=d&apikey=${encodeURIComponent(apikey)}`
-  }
-
-  if (!stooqFetchUrl) {
-    return new Response(
-      JSON.stringify({
-        error:
-          'Configure STOOQ_SPY_CSV_URL or STOOQ_API_KEY on the edge function (run npm run stooq-setup).',
-      }),
-      {
-        status: 503,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      },
-    )
-  }
+  const period2 = Math.floor(Date.now() / 1000)
+  const yahooUrl = `https://query2.finance.yahoo.com/v8/finance/chart/SPY?period1=1104537600&period2=${period2}&interval=1d`
 
   try {
-    const upstream = await fetch(stooqFetchUrl, {
+    const upstream = await fetch(yahooUrl, {
       headers: { 'User-Agent': fetchUserAgent },
     })
     if (!upstream.ok) {
       return new Response(
-        JSON.stringify({ error: `Stooq responded with ${upstream.status}` }),
+        JSON.stringify({ error: `Yahoo Finance responded with ${upstream.status}` }),
         {
           status: 502,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -95,11 +67,11 @@ serve(async (req) => {
       )
     }
 
-    const csv = await upstream.text()
-    const returns = returnsFromStooqCsv(csv)
+    const json: unknown = await upstream.json()
+    const returns = returnsFromYahooChart(json)
     if (!returns) {
       return new Response(
-        JSON.stringify({ error: 'Stooq CSV could not be parsed (check apikey).' }),
+        JSON.stringify({ error: 'Yahoo Finance chart could not be parsed.' }),
         {
           status: 502,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -108,12 +80,7 @@ serve(async (req) => {
     }
 
     const asOf = Object.keys(returns).reduce((a, b) => (a > b ? a : b))
-    const body = JSON.stringify({
-      source:
-        'https://stooq.com — SPY.US daily (S&P 500 ETF proxy; close-to-close)',
-      asOf,
-      returns,
-    })
+    const body = JSON.stringify({ source: SOURCE, asOf, returns })
 
     return new Response(body, {
       status: 200,

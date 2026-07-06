@@ -1,5 +1,5 @@
 /**
- * S&P 500 teaching path: daily returns from bundled/fetched JSON (SPY.US via Stooq).
+ * S&P 500 teaching path: daily returns from bundled/fetched JSON (SPY via Yahoo Finance).
  * Bundled copy loads synchronously so the first balance reconcile matches post-fetch
  * rules (weekends/holidays). Until data exists, weekdays use the ~7% smooth curve.
  */
@@ -81,7 +81,7 @@ export function sp500MarketDailyFactor(ymd: string): number {
     return 1
   }
   // Weekday with no bar: usually a market holiday in history, or “today” before
-  // Stooq has published this session’s close — use teaching fallback so growth
+  // Today’s close is not published yet — use teaching fallback so growth
   // isn’t stuck at $0 for same-day deposits.
   if (lastFetchedReturnDate && ymd > lastFetchedReturnDate) {
     return syntheticDailyFactor()

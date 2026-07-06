@@ -1,53 +1,44 @@
-import { defineConfig, loadEnv, type Plugin } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
+import { sp500AsOfFromReturns } from './src/lib/sp500MarketPayload'
 import {
-  resolveStooqSpyCsvUrl,
-  sp500AsOfFromReturns,
-  sp500ReturnsFromStooqCsv,
-} from './src/lib/sp500Stooq'
+  SP500_YAHOO_SOURCE,
+  sp500ReturnsFromYahooChart,
+  sp500YahooChartUrl,
+} from './src/lib/sp500Yahoo'
 
 // GitHub Pages project site: https://alexvia9.github.io/dsa/
 const repoBase = '/dsa/'
 
-function stooqDevMarketProxy(
-  stooqCsvUrl: string | undefined,
-  configured: boolean,
-): Plugin {
+const YAHOO_USER_AGENT =
+  'Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/alexvia9/dsa)'
+
+function yahooDevMarketProxy(): Plugin {
   return {
-    name: 'stooq-dev-market-proxy',
+    name: 'yahoo-dev-market-proxy',
     configureServer(server) {
       server.middlewares.use('/api/market/spy-returns', async (_req, res) => {
-        if (!configured || !stooqCsvUrl) {
-          res.statusCode = 503
-          res.setHeader('Content-Type', 'application/json')
-          res.end(
-            JSON.stringify({
-              error:
-                'Stooq is not configured. Add STOOQ_SPY_CSV_URL or STOOQ_API_KEY to .env (or .env.local) — see .env.example.',
-            }),
-          )
-          return
-        }
-
         try {
-          const upstream = await fetch(stooqCsvUrl)
+          const upstream = await fetch(sp500YahooChartUrl(), {
+            headers: { 'User-Agent': YAHOO_USER_AGENT },
+          })
           if (!upstream.ok) {
             res.statusCode = 502
             res.setHeader('Content-Type', 'application/json')
             res.end(
-              JSON.stringify({ error: `Stooq responded with ${upstream.status}` }),
+              JSON.stringify({ error: `Yahoo Finance responded with ${upstream.status}` }),
             )
             return
           }
 
-          const csv = await upstream.text()
-          const returns = sp500ReturnsFromStooqCsv(csv)
-          if (!returns) {
+          const json: unknown = await upstream.json()
+          const returns = sp500ReturnsFromYahooChart(json)
+          if (!returns || Object.keys(returns).length === 0) {
             res.statusCode = 502
             res.setHeader('Content-Type', 'application/json')
             res.end(
               JSON.stringify({
-                error: 'Stooq CSV could not be parsed (check your Stooq URL/key).',
+                error: 'Yahoo Finance chart could not be parsed.',
               }),
             )
             return
@@ -58,8 +49,7 @@ function stooqDevMarketProxy(
           res.setHeader('Content-Type', 'application/json')
           res.end(
             JSON.stringify({
-              source:
-                'https://stooq.com — SPY.US daily (S&P 500 ETF proxy; close-to-close)',
+              source: SP500_YAHOO_SOURCE,
               asOf,
               returns,
             }),
@@ -75,18 +65,7 @@ function stooqDevMarketProxy(
 }
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), '')
-  const stooqCsvUrl = resolveStooqSpyCsvUrl({
-    csvUrl: env.STOOQ_SPY_CSV_URL,
-    apikey: env.STOOQ_API_KEY,
-  })
-  const stooqConfigured = Boolean(
-    env.STOOQ_SPY_CSV_URL?.trim() || env.STOOQ_API_KEY?.trim(),
-  )
-
-  return {
-    base: mode === 'production' ? repoBase : '/',
-    plugins: [react(), stooqDevMarketProxy(stooqCsvUrl ?? undefined, stooqConfigured)],
-  }
-})
+export default defineConfig(({ mode }) => ({
+  base: mode === 'production' ? repoBase : '/',
+  plugins: [react(), yahooDevMarketProxy()],
+}))

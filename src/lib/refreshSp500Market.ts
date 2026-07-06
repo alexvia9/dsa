@@ -1,6 +1,6 @@
 import { getSupabase, isSupabaseConfigured } from './supabaseClient'
 import { mergeSp500DailyReturns, sp500MarketAsOf } from './sp500Market'
-import { sp500ReturnsPayloadFromJson } from './sp500Stooq'
+import { sp500ReturnsPayloadFromJson } from './sp500MarketPayload'
 
 async function fetchPublicSp500Json(): Promise<Record<string, number> | null> {
   const url = `${import.meta.env.BASE_URL}market/sp500-daily-returns.json?v=${Date.now()}`
@@ -42,7 +42,7 @@ async function fetchLiveSp500FromSupabase(): Promise<Record<string, number> | nu
 
 export type RefreshSp500Result = {
   asOf: string | null
-  /** True when live Stooq data was merged (edge fn or dev proxy). */
+  /** True when live Yahoo data was merged (edge fn or dev proxy). */
   live: boolean
 }
 

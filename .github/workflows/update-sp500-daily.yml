@@ -1,4 +1,5 @@
-# Fetches SPY daily prices from Stooq (requires STOOQ_API_KEY repo secret).
+# Fetches SPY daily prices from Yahoo Finance (no API key) and commits
+# close-to-close returns for the teaching simulator.
 name: Update SPY daily returns
 
 on:
@@ -20,20 +21,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Verify Stooq secrets
-        env:
-          STOOQ_SPY_CSV_URL: ${{ secrets.STOOQ_SPY_CSV_URL }}
-          STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
-        run: |
-          if [ -z "$STOOQ_SPY_CSV_URL" ] && [ -z "$STOOQ_API_KEY" ]; then
-            echo "::error::Add STOOQ_SPY_CSV_URL or STOOQ_API_KEY in repo Settings → Secrets → Actions."
-            exit 1
-          fi
-
       - name: Fetch and write sp500-daily-returns.json
-        env:
-          STOOQ_SPY_CSV_URL: ${{ secrets.STOOQ_SPY_CSV_URL }}
-          STOOQ_API_KEY: ${{ secrets.STOOQ_API_KEY }}
         run: node scripts/fetch-sp500-daily.mjs
 
       - uses: stefanzweifel/git-auto-commit-action@v6
