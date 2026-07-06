@@ -182,10 +182,8 @@ function StrategyEditorFull({
             maxLength={8}
           />
           <span className="hint">
-            For display only. Growth follows SPY/S&amp;P 500 daily returns from
-            bundled data (<code>src/data/sp500-daily-returns.json</code>, kept in
-            sync with <code>public/market/</code> by{' '}
-            <code>npm run update-sp500</code> or the repo’s daily GitHub Action).
+            Optional label for display (for example, &quot;College fund&quot;).
+            Doesn&apos;t change how growth is calculated.
           </span>
         </label>
       )}

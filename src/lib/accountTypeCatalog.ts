@@ -63,7 +63,7 @@ export const ACCOUNT_TYPE_BY_MODE: Record<
     vibeBecause:
       'it fluctuates based on real-world stock market performance to teach long-term “zoomed out” thinking.',
     howItWorks:
-      'Growth uses daily close-to-close returns on the S&P 500 via the SPY ETF. Data refreshes when you sign in or create a Market Index account. Non-trading days apply no change. If today’s close is not published yet, a simple ~7% annual stand-in is used for that day.',
+      "Each trading day, growth follows the real S&P 500 using the SPY ETF (from one market close to the next). Weekends and market holidays stay flat. When you open the app, we pick up the latest published daily returns. If today's close isn't available yet, a simple ~7% annual teaching estimate is used for that day only.",
     teachingContext:
       'Best for real-world context and comparison examples. A good next step after they understand growth basics and feel excited about it.',
   },
@@ -87,5 +87,5 @@ export const GROWTH_MODEL_ONE_LINE: Record<StrategyMode, string> = {
   monthly_end_compound:
     'You set a % per month; it applies once at month-end on the balance.',
   stock_market:
-    'Tracks the S&P 500 via SPY daily returns; non-trading days are flat. Falls back to a simple stand-in if data is missing.',
+    "S&P 500 via SPY daily returns; flat on weekends and holidays. Uses a ~7% teaching estimate until today's close is published.",
 }

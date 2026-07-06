@@ -653,6 +653,21 @@ export function AccountPage() {
         ) : null}
       </section>
 
+      <section
+        className="account-fidelity-panel account-growth-explainer"
+        aria-labelledby="account-growth-explainer-title"
+      >
+        <h2
+          id="account-growth-explainer-title"
+          className="account-fidelity-panel-title"
+        >
+          How growth works
+        </h2>
+        <p className="account-fidelity-panel-lede account-growth-explainer-body">
+          {product.howItWorks}
+        </p>
+      </section>
+
       <div className="account-fidelity-panels">
         {account.strategy.mode !== 'piggy_bank' ? (
           <AccountGrowthChart account={account} deposits={deposits} />

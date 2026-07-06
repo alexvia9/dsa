@@ -225,6 +225,10 @@
   margin: 0;
 }
 
+.account-page .account-growth-explainer {
+  margin-top: var(--fidelity-stack);
+}
+
 :is(.kid-page, .account-page) .account-fidelity-panel-head {
   margin-bottom: 0.75rem;
   padding-bottom: 0.75rem;
