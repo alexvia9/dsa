@@ -158,7 +158,7 @@ export function MonthEndCapChoice({ account, capCents, excessCents }: Props) {
       <p className="account-fidelity-panel-lede">
         This month-end jar earns its rate on {formatUsd(capCents)}.{' '}
         {formatUsd(excessCents)} is above that and is not compounding. It stays
-        here until you choose savings, the market, or a split.
+        here until you choose an account like savings, one like the market, or a split.
       </p>
       <form onSubmit={submit}>
         <fieldset className="field-group month-end-cap-placement">
@@ -185,7 +185,7 @@ export function MonthEndCapChoice({ account, capCents, excessCents }: Props) {
                 setError(null)
               }}
             />
-            <span>All to the market</span>
+            <span>All to an account like the market</span>
           </label>
           {canSplit ? (
             <label className="radio-row">
@@ -198,7 +198,7 @@ export function MonthEndCapChoice({ account, capCents, excessCents }: Props) {
                   setError(null)
                 }}
               />
-              <span>Split between savings and the market</span>
+              <span>Split between an account like savings and one like the market</span>
             </label>
           ) : null}
         </fieldset>
@@ -357,7 +357,7 @@ function DestinationFields({
         <p className="hint">
           {remainderCents == null
             ? 'Enter a savings amount greater than $0.00 and less than the extra.'
-            : `${formatUsd(remainderCents)} goes to the market.`}
+            : `${formatUsd(remainderCents)} goes to an account like the market.`}
         </p>
       ) : null}
     </fieldset>

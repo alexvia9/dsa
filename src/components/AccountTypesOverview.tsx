@@ -10,9 +10,9 @@ const REAL_MODES = ['savings_apr', 'stock_market'] as const
 
 const PRODUCT_SPECS: Record<InvestmentStrategy['mode'], string> = {
   piggy_bank: '0% · cash only',
-  savings_apr: 'Fixed APY · daily accrual',
+  savings_apr: 'Like a fixed APY · daily accrual',
   monthly_end_compound: 'Custom % · capped',
-  stock_market: 'S&P 500 · SPY daily',
+  stock_market: 'Illustration · like SPY',
 }
 
 const GROUPS = [
@@ -25,7 +25,7 @@ const GROUPS = [
   {
     id: 'real',
     title: 'When a month-end jar is full',
-    lede: 'Open these any time. Money past the learning cap moves here, into steady savings or the market.',
+    lede: 'Open these any time. Money past the learning cap moves here, into something that grows like steady savings or like the market.',
     modes: REAL_MODES,
   },
 ] as const
@@ -39,7 +39,7 @@ type Props = {
 
 export function AccountTypesOverview({
   title = 'How the accounts fit together',
-  lede = 'Save, give, and spend are the jars. Piggy bank and month-end are the two ways to compare them. Savings and the market are open whenever you want them.',
+  lede = 'Save, give, and spend are the jars. Piggy bank and month-end are the two ways to compare them. Accounts that grow like savings or like the market are open whenever you want them.',
   variant = 'default',
 }: Props) {
   const isLanding = variant === 'landing'

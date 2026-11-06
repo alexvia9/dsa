@@ -107,6 +107,9 @@ export function LandingProductPreview() {
             <span className="landing-preview-change-label">this month</span>
           </div>
           <PreviewSparkline />
+          <p className="landing-preview-simulated">
+            Simulated. You hold this cash. DSA does not.
+          </p>
         </div>
 
         <ul className="landing-preview-kids">

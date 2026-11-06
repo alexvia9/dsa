@@ -7,7 +7,9 @@ import {
   type ReactNode,
 } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { clearLegalAck } from '../lib/legalAck'
 import { promiseWithTimeout } from '../lib/promiseWithTimeout'
+import { clearLocalFamilyState } from '../lib/storage'
 import { getSupabase, isSupabaseConfigured } from '../lib/supabaseClient'
 
 type AuthModalMode = 'signIn' | 'signUp'
@@ -26,6 +28,7 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  deleteAccount: () => Promise<{ error: Error | null }>
   updateEmail: (
     email: string,
   ) => Promise<{ error: Error | null; pendingEmail: string | null }>
@@ -133,6 +136,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const deleteAccount = useMemo(
+    () => async () => {
+      const supabase = getSupabase()
+      if (!supabase) {
+        return { error: new Error('Supabase is not configured') }
+      }
+      const userId = session?.user.id
+      const { error } = await supabase.rpc('delete_own_account')
+      if (error) {
+        return {
+          error: new Error(
+            'Could not delete the account. Run the latest database migration (003_parent_ack_and_delete.sql) in Supabase, then try again.',
+          ),
+        }
+      }
+      if (userId) clearLegalAck(userId)
+      clearLocalFamilyState()
+      await supabase.auth.signOut()
+      return { error: null }
+    },
+    [session?.user.id],
+  )
+
   const updateEmail = useMemo(
     () => async (email: string) => {
       const supabase = getSupabase()
@@ -190,6 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
+      deleteAccount,
       updateEmail,
       updatePassword,
     }),
@@ -204,6 +231,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
+      deleteAccount,
       updateEmail,
       updatePassword,
     ],

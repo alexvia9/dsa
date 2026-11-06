@@ -194,7 +194,8 @@
 :is(.kid-page, .account-page) .account-fidelity-breadcrumb a {
   color: #0b5cab;
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 :is(.kid-page, .account-page) .account-fidelity-breadcrumb a:hover {
@@ -696,7 +697,7 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
-  background: var(--accent);
+  background: var(--accent-2);
   color: #fff;
   font-size: 1.65rem;
   font-weight: 700;
@@ -908,7 +909,7 @@
   border-radius: 1rem;
   border: 2px dashed rgba(0, 166, 81, 0.35);
   background: rgba(255, 255, 255, 0.65);
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 .family-setup-add-visual-icon {
@@ -1096,8 +1097,9 @@
 }
 
 .breadcrumb a {
-  color: var(--accent);
-  text-decoration: none;
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .breadcrumb a:hover {
@@ -1182,15 +1184,15 @@
 }
 
 .btn.primary {
-  background: var(--accent);
+  background: var(--accent-2);
   color: #fff;
   font-weight: 600;
-  border-color: var(--accent);
+  border-color: var(--accent-2);
 }
 
 .btn.primary:hover {
-  background: var(--accent-2);
-  border-color: var(--accent-2);
+  background: #006b34;
+  border-color: #006b34;
 }
 
 .btn.btn-lg {
@@ -1211,7 +1213,7 @@
 .btn.link {
   background: none;
   border: none;
-  color: var(--accent);
+  color: var(--accent-2);
   padding: 0.25rem 0.5rem;
   text-decoration: underline;
   font-weight: 500;
@@ -1680,7 +1682,7 @@
   justify-content: space-between;
   gap: 0.5rem;
   text-decoration: none;
-  color: var(--accent);
+  color: var(--accent-2);
   font-weight: 600;
 }
 
@@ -2505,7 +2507,7 @@
   width: 1.75rem;
   height: 1.75rem;
   border-radius: 0.5rem;
-  background: var(--accent);
+  background: var(--accent-2);
   color: #fff;
   font-weight: 800;
   font-size: 0.95rem;
@@ -2944,7 +2946,7 @@
 }
 
 .add-account-cta-grid.card:hover .add-account-cta-label {
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 .add-account-cta-body-wrap {
@@ -3167,7 +3169,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--accent);
+  color: var(--accent-2);
 }
 
 /* Editable page title (kid name, account name): pen on hover */
@@ -3263,7 +3265,7 @@
 }
 
 .name-edit-btn:hover {
-  color: var(--accent);
+  color: var(--accent-2);
   background: var(--accent-soft);
 }
 
@@ -3567,7 +3569,7 @@
 }
 
 .deposit-ledger-cta--inactive {
-  opacity: 0.5;
+  color: var(--muted);
   cursor: not-allowed;
 }
 
@@ -3686,7 +3688,10 @@
   background: none;
   border: none;
   margin: 0;
-  padding: 0.1rem 0.15rem;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.5rem;
+  padding: 0.15rem 0.35rem;
   font-size: 0.72rem;
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -3703,8 +3708,8 @@
 }
 
 .deposit-row-action:focus-visible {
-  outline: 1px solid var(--accent-soft);
-  outline-offset: 1px;
+  outline: 2px solid var(--accent-2);
+  outline-offset: 2px;
 }
 
 .deposit-row-action--danger:hover,
@@ -4647,9 +4652,9 @@
 }
 
 .login-mode-toggle .btn.is-active {
-  border-color: var(--accent);
+  border-color: var(--accent-2);
   background: var(--accent-soft);
-  color: var(--accent);
+  color: var(--navy);
   font-weight: 700;
 }
 
@@ -5117,15 +5122,15 @@
 }
 
 .landing-type-card.strategy-type-card--savings_apr .strategy-type-card-vibe {
-  color: #16a34a;
+  color: #15803d;
 }
 
 .landing-type-card.strategy-type-card--monthly_end_compound .strategy-type-card-vibe {
-  color: #ea580c;
+  color: #c2410c;
 }
 
 .landing-type-card.strategy-type-card--stock_market .strategy-type-card-vibe {
-  color: #ca8a04;
+  color: #a16207;
 }
 
 .landing-type-card .strategy-type-card-top {
@@ -5202,7 +5207,7 @@
 }
 
 .landing-cta .btn.primary {
-  background: var(--accent);
+  background: var(--accent-2);
   color: #fff;
 }
 
@@ -5227,6 +5232,109 @@
   max-width: 40rem;
   margin-inline: auto;
   line-height: 1.5;
+}
+
+.site-footer-links {
+  margin: 0.55rem 0 0;
+  font-size: 0.78rem;
+}
+
+.site-footer-links a {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.simulated-balance-note {
+  margin: 0.4rem 0 0;
+  max-width: 36rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+.landing-preview-simulated {
+  margin: 0.35rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #fff;
+}
+
+.auth-check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.auth-check input {
+  margin-top: 0.2rem;
+  flex: none;
+}
+
+.legal-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.legal-header .brand-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.legal-main h1 {
+  margin: 0 0 0.35rem;
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.75rem;
+}
+
+.legal-updated {
+  margin: 0 0 1.25rem;
+}
+
+.legal-prose h2 {
+  margin: 1.4rem 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.legal-prose p,
+.legal-prose li {
+  color: var(--text);
+  line-height: 1.55;
+}
+
+.legal-prose ul {
+  margin: 0.4rem 0 0.8rem;
+  padding-left: 1.2rem;
+}
+
+.legal-prose a {
+  color: var(--navy);
+  font-weight: 700;
+}
+
+.legal-gate-card {
+  width: min(32rem, 100%);
+  padding: 1.25rem 1.35rem 1.4rem;
+  text-align: left;
+}
+
+.legal-gate-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.35rem;
+}
+
+.legal-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.35rem;
+}
+
+.user-account-delete {
+  border-color: #e7cfc6;
 }
 
 /* --- Auth modal ----------------------------------------------------------- */
@@ -5347,8 +5455,9 @@
 }
 
 .family-balance-card .card-title,
-.family-balance-card .family-balance-meta {
-  color: rgba(255, 255, 255, 0.72);
+.family-balance-card .family-balance-meta,
+.family-balance-card .simulated-balance-note {
+  color: #fff;
 }
 
 .family-balance-card .big-number {
@@ -5444,8 +5553,9 @@
 }
 
 :is(.kid-page, .account-page) .account-fidelity-balance-label,
-:is(.kid-page, .account-page) .account-fidelity-change-label {
-  color: rgba(255, 255, 255, 0.72);
+:is(.kid-page, .account-page) .account-fidelity-change-label,
+:is(.kid-page, .account-page) .account-fidelity-balance-block .simulated-balance-note {
+  color: #fff;
 }
 
 :is(.kid-page, .account-page) .account-fidelity-balance {
@@ -6155,7 +6265,8 @@
 :is(.kid-page, .account-page) .account-fidelity-meta a {
   color: var(--navy);
   font-weight: 800;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .kid-page .kid-fidelity-holdings .add-account-cta-label,
@@ -6309,7 +6420,7 @@
   letter-spacing: -0.01em;
   font-size: 0.8rem;
   font-weight: 800;
-  opacity: 0.78;
+  opacity: 1;
 }
 
 .landing-preview-balance {
@@ -6343,20 +6454,42 @@
 .kid-page .account-fidelity-balance-block,
 .landing-preview-balance-card,
 .landing-cta {
-  background: linear-gradient(165deg, #5b92c7 0%, #2f6eab 100%);
+  background: #e7f6ee;
+  color: #0c2340;
   box-shadow:
-    0 4px 0 #245a8c,
-    0 10px 16px rgba(36, 90, 140, 0.22);
+    0 4px 0 rgba(12, 35, 64, 0.06),
+    0 10px 16px rgba(12, 35, 64, 0.08);
+}
+
+.family-balance-card .card-title,
+.family-balance-card .big-number,
+.landing-cta .landing-cta-title,
+.landing-preview-label,
+.landing-preview-balance,
+.landing-preview-change-label,
+.kid-page:not(.profile-colored) .account-fidelity-balance,
+.kid-page:not(.profile-colored) .account-fidelity-change,
+.kid-page:not(.profile-colored) .account-fidelity-change-value,
+.kid-page:not(.profile-colored) .account-fidelity-balance-label,
+.kid-page:not(.profile-colored) .account-fidelity-change-label {
+  color: #0c2340;
+}
+
+.family-balance-card .family-balance-meta,
+.family-balance-card .simulated-balance-note,
+.landing-cta .landing-cta-inner p,
+.landing-preview-simulated,
+.kid-page:not(.profile-colored) .account-fidelity-balance-block .simulated-balance-note {
+  color: #245c38;
+}
+
+.landing-preview-change.positive {
+  color: #006b34;
 }
 
 .landing-cta {
   margin-top: 1.5rem;
   border-radius: 2rem;
-}
-
-.landing-cta .landing-cta-title,
-.landing-cta .landing-cta-inner p {
-  color: #fff;
 }
 
 .account-page .account-fidelity-summary--piggy_bank .account-fidelity-balance-block {

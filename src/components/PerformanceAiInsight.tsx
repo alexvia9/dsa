@@ -36,9 +36,10 @@ export function PerformanceAiInsight(props: PerformanceAiInsightProps) {
         <span className="performance-ai-insight-badge">Coming soon</span>
       </div>
       <p className="performance-ai-insight-lede">
-        We&apos;ll use AI to explain this account in plain language—what moved the
-        balance in the period you selected, how your growth rules applied, and how
-        deposits and withdrawals fit in.
+        When this is turned on, it will explain the rules that already applied
+        to this pretend balance: what moved it in the period you selected, and
+        how deposits and withdrawals fit in. It will not recommend a purchase,
+        a sale, or an allocation.
       </p>
       <button
         type="button"

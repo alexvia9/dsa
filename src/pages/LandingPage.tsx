@@ -4,6 +4,8 @@ import { AccountTypesOverview } from '../components/AccountTypesOverview'
 import { LandingProductPreview } from '../components/LandingProductPreview'
 import { DsaLogoMark, DsaMonogram } from '../components/DsaLogoMark'
 import { useAuth } from '../context/AuthContext'
+import { SiteFooter } from '../components/SiteFooter'
+import { APP_TITLE, usePageTitle } from '../lib/pageTitle'
 import { isSupabaseConfigured } from '../lib/supabaseClient'
 
 const FEATURES = [
@@ -17,7 +19,7 @@ const FEATURES = [
   },
   {
     title: 'Growth, calculated for you',
-    body: 'Interest and market moves update automatically so you and your kids can see progress—not just the last deposit.',
+    body: 'Interest and moves like the market follow the teaching rules, so you and your kids can see progress—not just the last deposit. The balances stay pretend.',
   },
   {
     title: 'Sync across devices',
@@ -29,10 +31,11 @@ const FEATURES = [
 ] as const
 
 export function LandingPage() {
-  const { session, openAuthModal, loading } = useAuth()
+  const { session, openAuthModal, loading, authModalOpen } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const cloud = isSupabaseConfigured()
+  usePageTitle(authModalOpen ? null : APP_TITLE)
 
   useEffect(() => {
     if (!loading && session) {
@@ -99,8 +102,8 @@ export function LandingPage() {
             <p className="landing-lede">
               DSA replaces envelope jars with one clear view. You still hold the
               cash. Save, give, and spend are the jars—compare a piggy bank with
-              month-end growth, and open savings or the market when that money
-              should grow for real.
+              month-end growth, and open savings or the market when you want
+              that money to grow like savings or like the market.
             </p>
             <div className="landing-hero-actions">
               {cloud ? (
@@ -128,7 +131,8 @@ export function LandingPage() {
             </div>
             <p className="landing-disclaimer-inline">
               Simulation only—you hold all real money. Nothing is moved or invested
-              through DSA.
+              through DSA. A market balance illustrates a published daily
+              percentage change. It is not a quote and not for trading.
             </p>
           </div>
           <LandingProductPreview />
@@ -162,7 +166,7 @@ export function LandingPage() {
         <AccountTypesOverview
           variant="landing"
           title="Save, give, and spend"
-          lede="Those are the jars. Run any of them as a piggy bank or a month-end account and compare the two. Savings and the market stay available the whole time."
+          lede="Those are the jars. Run any of them as a piggy bank or a month-end account and compare the two. Accounts that grow like savings or like the market stay available the whole time."
         />
 
         <section className="landing-cta">
@@ -190,14 +194,7 @@ export function LandingPage() {
         </section>
       </main>
 
-      <footer className="landing-footer">
-        <p className="landing-footer-brand">Dad Savings Account</p>
-        <p className="landing-footer-legal">
-          Teaching simulator only. You hold all real money; DSA does not. Not
-          financial advice, not FDIC insured, and not affiliated with any bank
-          or brokerage.
-        </p>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

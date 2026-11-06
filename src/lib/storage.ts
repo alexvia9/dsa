@@ -31,3 +31,8 @@ export function loadState(): DsaState | null {
 export function saveState(state: DsaState): void {
   localStorage.setItem(KEY_V2, JSON.stringify(state))
 }
+
+export function clearLocalFamilyState(): void {
+  localStorage.removeItem(KEY_V2)
+  localStorage.removeItem(KEY_V1)
+}

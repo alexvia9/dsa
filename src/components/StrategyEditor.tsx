@@ -425,7 +425,7 @@ function MonthEndCapField({
       <span className="hint">
         Month-end growth applies only up to this balance. Leave blank for no
         cap. Money above the cap does not earn the month-end rate until it
-        moves to savings or the market.
+        moves to an account that grows like savings or like the market.
       </span>
     </label>
   )

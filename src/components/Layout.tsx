@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext'
 import { useDsa } from '../context/DsaContext'
 import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
 import { isSupabaseConfigured } from '../lib/supabaseClient'
+import { SiteFooter } from './SiteFooter'
 
 function kidFirstName(name: string): string {
   const trimmed = name.trim()
@@ -149,6 +150,7 @@ export function Layout() {
         ) : null}
         <Outlet />
       </main>
+      <SiteFooter />
     </div>
   )
 }

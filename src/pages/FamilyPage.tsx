@@ -1,12 +1,22 @@
 import { Link } from 'react-router-dom'
 import { AddChildFlow } from '../components/AddChildFlow'
 import { KidAvatar } from '../components/KidAvatar'
+import { SimulatedBalanceNote } from '../components/SimulatedBalanceNote'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { useDsa } from '../context/DsaContext'
+import { localDateString } from '../lib/dateLocal'
 import { formatUsd } from '../lib/money'
+import { pageTitle, usePageTitle } from '../lib/pageTitle'
+import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
 
 export function FamilyPage() {
   const { state, familyTotalCents } = useDsa()
+  usePageTitle(pageTitle('Your family'))
+  const hasMarketIllustration = state.accounts.some(
+    (account) => account.strategy.mode === 'stock_market',
+  )
+  const showMarketEstimate =
+    hasMarketIllustration && sp500UsesTeachingEstimate(localDateString())
 
   return (
     <div className="page family-page">
@@ -21,6 +31,10 @@ export function FamilyPage() {
       <section className="card highlight family-balance-card">
         <h2 className="card-title">Household balance</h2>
         <p className="big-number">{formatUsd(familyTotalCents)}</p>
+        <SimulatedBalanceNote
+          showMarketIllustration={hasMarketIllustration}
+          showMarketEstimate={showMarketEstimate}
+        />
         <p className="muted small family-balance-meta">
           {state.kids.length} family member
           {state.kids.length === 1 ? '' : 's'}
@@ -39,11 +53,7 @@ export function FamilyPage() {
             return (
               <li key={kid.id}>
                 <article className="card kid-card">
-                  <Link
-                    to={`/kids/${kid.id}`}
-                    className="kid-card-link"
-                    aria-label={`${kid.name}, total balance ${formatUsd(total)}`}
-                  >
+                  <Link to={`/kids/${kid.id}`} className="kid-card-link">
                     <KidAvatar name={kid.name} colorId={kid.avatarColor} />
                     <span className="kid-card-summary">
                       <span className="kid-card-name">{kid.name}</span>

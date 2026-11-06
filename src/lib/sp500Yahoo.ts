@@ -1,4 +1,9 @@
-/** Parse Yahoo Finance chart JSON into close-to-close daily returns (YYYY-MM-DD keys). */
+/**
+ * Parse Yahoo Finance chart JSON into close-to-close daily returns.
+ * SCALE: fine at current size. Address before a larger audience — see README.
+ * Their terms restrict automated collection and redistribution, and this
+ * chart endpoint is unofficial.
+ */
 export function sp500ReturnsFromYahooChart(json: unknown): Record<string, number> {
   if (!json || typeof json !== 'object') return {}
   const chart = (json as { chart?: unknown }).chart
@@ -34,7 +39,7 @@ export function sp500ReturnsFromYahooChart(json: unknown): Record<string, number
 }
 
 export const SP500_YAHOO_SOURCE =
-  'https://finance.yahoo.com/quote/SPY — SPY daily (S&P 500 ETF proxy; close-to-close)'
+  'Illustration only. Daily percentage change like the published SPY close-to-close move, sourced from Yahoo Finance (https://finance.yahoo.com/quote/SPY). Not a quote, not a data feed, and not for trading. Not affiliated with Yahoo, S&P Dow Jones Indices, or the SPY sponsor.'
 
 /** Yahoo chart URL for full SPY history through today (server-side only). */
 export function sp500YahooChartUrl(period2Sec = Math.floor(Date.now() / 1000)): string {

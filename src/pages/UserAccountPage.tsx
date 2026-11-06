@@ -3,9 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { AddChildFlow } from '../components/AddChildFlow'
 import { KidAvatar } from '../components/KidAvatar'
 import { useAuth } from '../context/AuthContext'
+import { SimulatedBalanceNote } from '../components/SimulatedBalanceNote'
 import { useDsa } from '../context/DsaContext'
+import { localDateString } from '../lib/dateLocal'
 import { confirmCloseChild } from '../lib/confirmCloseChild'
 import { formatUsd } from '../lib/money'
+import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
+import { pageTitle, usePageTitle } from '../lib/pageTitle'
 import { isSupabaseConfigured } from '../lib/supabaseClient'
 
 export function UserAccountPage() {
@@ -13,6 +17,7 @@ export function UserAccountPage() {
   const navigate = useNavigate()
   const email = session?.user.email ?? null
   const cloud = isSupabaseConfigured() && session != null
+  usePageTitle(pageTitle('Your account'))
 
   async function handleSignOut() {
     await signOut()
@@ -54,6 +59,8 @@ export function UserAccountPage() {
           </button>
         </section>
       ) : null}
+
+      {cloud ? <DeleteAccountSection onDeleted={() => navigate('/')} /> : null}
     </div>
   )
 }
@@ -238,14 +245,25 @@ function PasswordSection() {
 
 function ChildrenSection() {
   const { state, closeKid } = useDsa()
+  const hasMarketIllustration = state.accounts.some(
+    (account) => account.strategy.mode === 'stock_market',
+  )
+  const showMarketEstimate =
+    hasMarketIllustration && sp500UsesTeachingEstimate(localDateString())
 
   return (
     <section className="card user-account-section">
       <h2 className="card-title">Children</h2>
       <p className="hint">
         Open a child to work with their accounts, or remove them from the
-        family.
+        family. You enter each child’s name. Children do not have logins.
       </p>
+      {state.accounts.length > 0 ? (
+        <SimulatedBalanceNote
+          showMarketIllustration={hasMarketIllustration}
+          showMarketEstimate={showMarketEstimate}
+        />
+      ) : null}
       {state.kids.length === 0 ? (
         <p className="user-account-empty">No children yet.</p>
       ) : (
@@ -286,6 +304,62 @@ function ChildrenSection() {
         navigateTo="stay"
         ctaLabel="Add a child"
       />
+    </section>
+  )
+}
+
+function DeleteAccountSection({ onDeleted }: { onDeleted: () => void }) {
+  const { deleteAccount } = useAuth()
+  const [phrase, setPhrase] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault()
+    if (phrase !== 'DELETE') return
+    setBusy(true)
+    setMessage(null)
+    const { error } = await deleteAccount()
+    if (error) {
+      setMessage(error.message)
+      setBusy(false)
+      return
+    }
+    onDeleted()
+  }
+
+  return (
+    <section className="card user-account-section user-account-delete">
+      <h2 className="card-title">Delete account</h2>
+      <p className="hint">
+        Deletes your login and every child, account, and ledger row saved to
+        the cloud. This cannot be undone. Any real cash stays with you. DSA
+        never held it.
+      </p>
+      <form onSubmit={(e) => void onSubmit(e)}>
+        <label className="field">
+          <span className="label">Type DELETE to confirm</span>
+          <input
+            className="input"
+            value={phrase}
+            onChange={(e) => setPhrase(e.target.value)}
+            autoComplete="off"
+            required
+          />
+        </label>
+        {message ? (
+          <p className="login-message" role="alert">
+            {message}
+          </p>
+        ) : null}
+        <button
+          type="submit"
+          className="btn secondary"
+          disabled={busy || phrase !== 'DELETE'}
+        >
+          {busy ? 'Deleting…' : 'Delete account'}
+        </button>
+      </form>
     </section>
   )
 }

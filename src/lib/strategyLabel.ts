@@ -42,7 +42,7 @@ export function growthExplanation(s: InvestmentStrategy): string {
   if (cap === undefined) {
     return 'Money still moves on deposit and withdrawal dates. The percentage for a month applies once at month-end on the full balance. Set a learning cap when dollars above it should stop earning this rate.'
   }
-  return `Money still moves on deposit and withdrawal dates. The month-end percentage applies once, and only to the balance up to ${formatUsd(cap)}. Anything above that earns nothing until you move it to savings or the market.`
+  return `Money still moves on deposit and withdrawal dates. The month-end percentage applies once, and only to the balance up to ${formatUsd(cap)}. Anything above that earns nothing until you move it to an account that grows like savings or like the market.`
 }
 
 /** One sentence describing what drives rule-based growth (chart window copy). */
@@ -51,7 +51,7 @@ export function strategyGrowthBasisLine(s: InvestmentStrategy): string {
     case 'piggy_bank':
       return 'No growth rate—only deposits and withdrawals move the balance.'
     case 'savings_apr':
-      return `Smooth daily interest from your ${s.annualRatePercent}% annual rate (APR).`
+      return `Smooth daily interest from your ${s.annualRatePercent}% annual rate, like a savings account (APY). The balance is pretend.`
     case 'monthly_end_compound': {
       const cap = readMonthEndCapCents(s)
       if (cap === undefined) {
@@ -60,6 +60,6 @@ export function strategyGrowthBasisLine(s: InvestmentStrategy): string {
       return `Month-end compounding on the balance up to ${formatUsd(cap)}. Anything above that cap does not earn this rate.`
     }
     case 'stock_market':
-      return 'Daily S&P 500 (SPY) close-to-close returns from bundled history, with a small teaching rate on recent weekdays when the latest trading day is not in the file yet.'
+      return 'Illustration of the published SPY close-to-close change (source: Yahoo Finance) on a pretend balance, with a ~7% yearly teaching rate until that day’s close is in. Not a quote and not shares of SPY.'
   }
 }

@@ -106,7 +106,8 @@ export function AddChildFlow({
 
         <div className="strategy-modal-body add-child-modal-body">
           <p className="muted small add-child-inline-lede">
-            Pick a color and name — you can change both later.
+            You enter their first name. Children do not create accounts or type
+            into DSA. You can change the name and color later.
           </p>
           <div className="add-child-inline-body">
             <div className="add-child-preview">

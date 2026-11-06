@@ -11,9 +11,11 @@ import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { LedgerMonthEndGrowthField } from '../components/MonthEndRatesByLedgerMonth'
 import { StrategyEditor } from '../components/StrategyEditor'
 import { FamilyBreadcrumb } from '../components/FamilyBreadcrumb'
+import { SimulatedBalanceNote } from '../components/SimulatedBalanceNote'
 import { useDsa } from '../context/DsaContext'
 import { CloseAccountSection } from '../components/CloseAccountSection'
 import { homeAppPath } from '../lib/familyRouting'
+import { pageTitle, usePageTitle } from '../lib/pageTitle'
 import { localDateString } from '../lib/dateLocal'
 import {
   getAccountGrowthMetrics,
@@ -33,6 +35,7 @@ import {
 import { accountTypeForMode } from '../lib/accountTypeCatalog'
 import { kidAvatarColorHex } from '../lib/kidAvatarColors'
 import { growthExplanation, strategySummary } from '../lib/strategyLabel'
+import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
 import type {
   Account,
   DepositRecord,
@@ -398,6 +401,8 @@ export function AccountPage() {
     }
   }, [ledgerModalOpen])
 
+  usePageTitle(account ? pageTitle(account.name) : pageTitle('Account'))
+
   if (!accountId) {
     return <Navigate to={homeAppPath(state.kids)} replace />
   }
@@ -425,6 +430,10 @@ export function AccountPage() {
       : metrics.growthCents < 0
         ? 'account-fidelity-change--negative'
         : ''
+
+  const showMarketIllustration = account.strategy.mode === 'stock_market'
+  const showMarketEstimate =
+    showMarketIllustration && sp500UsesTeachingEstimate(localDateString())
 
   const openStrategyModal = () => {
     const draft = cloneInvestmentStrategy(account.strategy)
@@ -577,7 +586,7 @@ export function AccountPage() {
                       setNameDraft(account.name)
                       setEditingName(true)
                     }}
-                    aria-label={`Edit account name (${account.name})`}
+                    aria-label={`Edit name for ${account.name}`}
                   >
                     Edit name
                   </button>
@@ -607,6 +616,10 @@ export function AccountPage() {
               {formatUsd(metrics.growthCents)}
             </span>
           </p>
+          <SimulatedBalanceNote
+            showMarketIllustration={showMarketIllustration}
+            showMarketEstimate={showMarketEstimate}
+          />
         </div>
 
         <dl className="account-fidelity-meta">

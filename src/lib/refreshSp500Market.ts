@@ -49,6 +49,7 @@ export type RefreshSp500Result = {
 /**
  * Pull the newest SPY daily returns we can reach, merge into the in-memory
  * teaching simulator, and return the latest date key.
+ * SCALE: Yahoo stays for now. Address before a larger audience — see README.
  */
 export async function refreshSp500MarketData(opts?: {
   /** Attempt Supabase edge fn (prod) or Vite dev proxy before static JSON only. */

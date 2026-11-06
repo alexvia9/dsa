@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { markSignupLegalPending } from '../lib/legalAck'
+import { pageTitle } from '../lib/pageTitle'
 import { isSupabaseConfigured } from '../lib/supabaseClient'
 
 export function AuthModal() {
@@ -19,6 +21,8 @@ export function AuthModal() {
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [adult, setAdult] = useState(false)
+  const [agree, setAgree] = useState(false)
 
   useEffect(() => {
     const el = dialogRef.current
@@ -42,6 +46,19 @@ export function AuthModal() {
       setEmail('')
       setPassword('')
       setMessage(null)
+      setAdult(false)
+      setAgree(false)
+    }
+  }, [authModalOpen, authModalMode])
+
+  useEffect(() => {
+    if (!authModalOpen) return
+    const previous = document.title
+    document.title = pageTitle(
+      authModalMode === 'signIn' ? 'Sign in' : 'Create account',
+    )
+    return () => {
+      document.title = previous
     }
   }, [authModalOpen, authModalMode])
 
@@ -59,6 +76,7 @@ export function AuthModal() {
         return
       }
       if (authModalMode === 'signUp') {
+        markSignupLegalPending(email)
         setMessage(
           'Check your email to confirm your account (if confirmation is enabled), then sign in.',
         )
@@ -92,7 +110,9 @@ export function AuthModal() {
 
         <div className="strategy-modal-body auth-modal-body">
           <p className="muted small auth-modal-lede">
-            Your family data is saved to the cloud when you sign in.
+            {authModalMode === 'signUp'
+              ? 'For a parent or guardian. You enter your child’s name and every ledger line. Children do not create accounts.'
+              : 'Your family data is saved to the cloud when you sign in.'}
           </p>
 
           <div
@@ -149,6 +169,42 @@ export function AuthModal() {
               minLength={6}
             />
           </label>
+          {authModalMode === 'signUp' ? (
+            <>
+              <label className="auth-check">
+                <input
+                  type="checkbox"
+                  checked={adult}
+                  onChange={(e) => setAdult(e.target.checked)}
+                  required
+                />
+                <span>
+                  I am a parent or legal guardian, and I am 18 or older. I will
+                  enter my child’s name and every deposit and withdrawal.
+                  Children do not create accounts.
+                </span>
+              </label>
+              <label className="auth-check">
+                <input
+                  type="checkbox"
+                  checked={agree}
+                  onChange={(e) => setAgree(e.target.checked)}
+                  required
+                />
+                <span>
+                  I agree to the{' '}
+                  <Link to="/terms" onClick={closeAuthModal}>
+                    Terms of Use
+                  </Link>{' '}
+                  and{' '}
+                  <Link to="/privacy" onClick={closeAuthModal}>
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+            </>
+          ) : null}
           {message ? (
             <p
               className={`login-message ${
@@ -158,6 +214,13 @@ export function AuthModal() {
                   ? 'login-message--info'
                   : ''
               }`}
+              role={
+                authModalMode === 'signUp' &&
+                !message.includes('failed') &&
+                !message.includes('Invalid')
+                  ? 'status'
+                  : 'alert'
+              }
             >
               {message}
             </p>

@@ -6,11 +6,14 @@ const corsHeaders = {
     'authorization, x-client-info, apikey, content-type',
 }
 
+// SCALE: Yahoo chart read is fine at current size. Address before a larger
+// audience — see README. Terms restrict automated collection and redistribution.
+
 const fetchUserAgent =
   'Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/alexvia9/dsa)'
 
 const SOURCE =
-  'https://finance.yahoo.com/quote/SPY — SPY daily (S&P 500 ETF proxy; close-to-close)'
+  'Illustration only. Daily percentage change like the published SPY close-to-close move, sourced from Yahoo Finance (https://finance.yahoo.com/quote/SPY). Not a quote, not a data feed, and not for trading. Not affiliated with Yahoo, S&P Dow Jones Indices, or the SPY sponsor.'
 
 function returnsFromYahooChart(json: unknown): Record<string, number> | null {
   if (!json || typeof json !== 'object') return null

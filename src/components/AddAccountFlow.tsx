@@ -195,7 +195,7 @@ export function AddAccountFlow({
               </span>
               <span className="kid-add-account-prominent-lede">
                 Name it save, give, or spend, then pick piggy bank or month-end.
-                Savings and the market are open whenever you want them.
+                Accounts that grow like savings or like the market are open whenever you want them.
               </span>
             </button>
           </li>

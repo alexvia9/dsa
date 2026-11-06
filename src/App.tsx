@@ -1,21 +1,33 @@
 import type { ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { AuthModal } from './components/AuthModal'
+import { LegalAcceptanceGate } from './components/LegalAcceptanceGate'
 import { Layout } from './components/Layout'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { DsaProvider, useDsa } from './context/DsaContext'
+import { pageTitle, usePageTitle } from './lib/pageTitle'
 import { isSupabaseConfigured } from './lib/supabaseClient'
 import { AccountPage } from './pages/AccountPage'
 import { FamilyHomeRoute } from './pages/FamilyHomeRoute'
 import { KidPage } from './pages/KidPage'
 import { LandingPage } from './pages/LandingPage'
+import { PrivacyPage } from './pages/PrivacyPage'
+import { TermsPage } from './pages/TermsPage'
 import { UserAccountPage } from './pages/UserAccountPage'
 import './App.css'
 
 function DsaBootGate({ children }: { children: ReactNode }) {
   const { remoteHydrated, cloudLoadStatus, retryCloudLoad } = useDsa()
+  const booting = !remoteHydrated || cloudLoadStatus === 'loading'
+  usePageTitle(
+    booting
+      ? pageTitle('Loading')
+      : cloudLoadStatus === 'error'
+        ? pageTitle('Couldn’t load family')
+        : null,
+  )
 
-  if (!remoteHydrated || cloudLoadStatus === 'loading') {
+  if (booting) {
     return (
       <div className="app-boot">
         <p className="app-boot-text">Loading your saved family…</p>
@@ -57,17 +69,26 @@ function ProtectedShell() {
   const remoteUserId = configured && session ? session.user.id : null
 
   return (
-    <DsaProvider remoteUserId={remoteUserId}>
-      <DsaBootGate>
-        <Layout />
-      </DsaBootGate>
-    </DsaProvider>
+    <LegalAcceptanceGate>
+      <DsaProvider remoteUserId={remoteUserId}>
+        <DsaBootGate>
+          <Layout />
+        </DsaBootGate>
+      </DsaProvider>
+    </LegalAcceptanceGate>
   )
 }
 
 function AppRoutes() {
   const { loading, authInitError } = useAuth()
   const configured = isSupabaseConfigured()
+  usePageTitle(
+    configured && loading
+      ? pageTitle('Loading')
+      : configured && authInitError
+        ? pageTitle('Sign-in unavailable')
+        : null,
+  )
 
   if (configured && loading) {
     return (
@@ -93,6 +114,8 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
+      <Route path="/terms" element={<TermsPage />} />
+      <Route path="/privacy" element={<PrivacyPage />} />
       <Route element={<ProtectedShell />}>
         <Route path="/account" element={<UserAccountPage />} />
         <Route path="/family" element={<FamilyHomeRoute />} />

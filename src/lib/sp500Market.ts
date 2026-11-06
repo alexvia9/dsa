@@ -1,7 +1,7 @@
 /**
- * S&P 500 teaching path: daily returns from bundled/fetched JSON (SPY via Yahoo Finance).
- * Bundled copy loads synchronously so the first balance reconcile matches post-fetch
- * rules (weekends/holidays). Until data exists, weekdays use the ~7% smooth curve.
+ * Teaching path for growth like the S&P 500. Daily returns come from bundled
+ * history, then a live SPY chart read used only to simulate pretend balances.
+ * Weekdays after the latest published close use the ~7% teaching estimate.
  */
 import { parseLocalDateString } from './dateLocal'
 import sp500Bundled from '../data/sp500-daily-returns.json'
@@ -62,9 +62,22 @@ export function mergeSp500DailyReturns(m: Record<string, number> | null): void {
   loadAttempted = true
 }
 
-/** Latest YYYY-MM-DD with a published SPY close-to-close return. */
+/** Latest YYYY-MM-DD in the teaching history. */
 export function sp500MarketAsOf(): string | null {
   return lastFetchedReturnDate
+}
+
+/**
+ * True when this calendar day is using the ~7% yearly teaching fill
+ * instead of a return from the history file.
+ */
+export function sp500UsesTeachingEstimate(ymd: string): boolean {
+  if (isWeekendYmd(ymd)) return false
+  if (!loadAttempted || !returnsByYmd) return true
+  const r = returnsByYmd[ymd]
+  if (typeof r === 'number' && Number.isFinite(r)) return false
+  if (lastFetchedReturnDate && ymd > lastFetchedReturnDate) return true
+  return false
 }
 
 /** Multiplier applied to balance after ledger flows on that calendar day (1 + daily return). */

@@ -11,6 +11,7 @@ import { AddChildFlow } from '../components/AddChildFlow'
 import { AccountGrowthTrend } from '../components/AccountGrowthTrend'
 import { FamilyBreadcrumb } from '../components/FamilyBreadcrumb'
 import { KidAvatar } from '../components/KidAvatar'
+import { SimulatedBalanceNote } from '../components/SimulatedBalanceNote'
 import { KidAvatarColorPicker } from '../components/KidAvatarColorPicker'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { useDsa } from '../context/DsaContext'
@@ -18,7 +19,9 @@ import { getAccountGrowthMetrics } from '../lib/accountGrowth'
 import { localDateString } from '../lib/dateLocal'
 import { formatUsd, parseUsdToCents } from '../lib/money'
 import { strategySummary } from '../lib/strategyLabel'
+import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
 import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
+import { pageTitle, usePageTitle } from '../lib/pageTitle'
 import {
   kidAvatarColorHex,
   type KidAvatarColorId,
@@ -88,11 +91,13 @@ export function KidPage() {
     }
   }, [kidId, state.accounts, state.deposits])
 
+  const kid = kidId ? kidById.get(kidId) : undefined
+  usePageTitle(kid ? pageTitle(kid.name) : pageTitle('Child'))
+
   if (!kidId) {
     return <Navigate to={homeAppPath(state.kids)} replace />
   }
 
-  const kid = kidById.get(kidId)
   if (!kid) {
     return (
       <div className="page">
@@ -109,6 +114,12 @@ export function KidPage() {
       : kidPortfolioMetrics.totalGrowthCents < 0
         ? 'account-fidelity-change--negative'
         : ''
+
+  const hasMarketIllustration = accounts.some(
+    (account) => account.strategy.mode === 'stock_market',
+  )
+  const showMarketEstimate =
+    hasMarketIllustration && sp500UsesTeachingEstimate(localDateString())
 
   const effectiveKidLedgerAccountId =
     kidLedgerAccountId && accounts.some((a) => a.id === kidLedgerAccountId)
@@ -242,7 +253,7 @@ export function KidPage() {
                       setAvatarColorDraft(kid.avatarColor)
                       setEditingName(true)
                     }}
-                    aria-label={`Edit ${kid.name}’s profile`}
+                    aria-label={`Edit profile for ${kid.name}`}
                   >
                     Edit profile
                   </button>
@@ -253,6 +264,7 @@ export function KidPage() {
           {accounts.length > 0 && !editingName ? (
             <div
               className="kid-fidelity-quick-actions"
+              role="group"
               aria-label="Quick deposit or withdrawal"
             >
               <button
@@ -284,6 +296,10 @@ export function KidPage() {
               {formatUsd(kidPortfolioMetrics.totalGrowthCents)}
             </span>
           </p>
+          <SimulatedBalanceNote
+            showMarketIllustration={hasMarketIllustration}
+            showMarketEstimate={showMarketEstimate}
+          />
         </div>
 
         <dl className="account-fidelity-meta">
@@ -306,7 +322,7 @@ export function KidPage() {
         <div
           className="account-fidelity-metrics"
           role="group"
-          aria-label="Portfolio totals"
+          aria-label="Like portfolio totals"
         >
           <div className="account-fidelity-metric">
             <span className="account-fidelity-metric-label">Deposits</span>
@@ -333,8 +349,8 @@ export function KidPage() {
         {accounts.length === 0 ? (
           <p className="account-fidelity-empty-hint">
             Open save, give, and spend jars for {kid.name}. Compare a piggy
-            bank with a month-end account. Savings and the market are there
-            when you want them.
+            bank with a month-end account. Accounts that grow like savings or
+            like the market are there when you want them.
           </p>
         ) : null}
 
@@ -517,7 +533,6 @@ export function KidPage() {
                 <Link
                   to={`/accounts/${a.id}`}
                   className={`kid-fidelity-holding-row account-row-link--${a.strategy.mode}`}
-                  aria-label={`${a.name}, balance ${formatUsd(a.balanceCents)}. ${strategySummary(a.strategy, { omitBenchmark: true })}`}
                 >
                   <span className="kid-fidelity-holding-account">
                     <span

@@ -2,6 +2,10 @@
  * Fetches SPY (S&P 500 ETF) daily close-to-close returns and writes JSON for the
  * teaching simulator. Uses Yahoo Finance server-side — no API key or captcha.
  *
+ * SCALE: fine at current size. Address before a larger audience — see README.
+ * Yahoo's terms restrict automated collection and redistribution, and this
+ * chart endpoint is unofficial.
+ *
  * Run: npm run update-sp500
  */
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -19,7 +23,7 @@ const YAHOO_USER_AGENT =
   'Mozilla/5.0 (compatible; DSA/1.0; +https://github.com/alexvia9/dsa)'
 
 const SOURCE =
-  'https://finance.yahoo.com/quote/SPY — SPY daily (S&P 500 ETF proxy; close-to-close)'
+  'Illustration only. Daily percentage change like the published SPY close-to-close move, sourced from Yahoo Finance (https://finance.yahoo.com/quote/SPY). Not a quote, not a data feed, and not for trading. Not affiliated with Yahoo, S&P Dow Jones Indices, or the SPY sponsor.'
 
 /** @param {unknown} json */
 function returnsFromYahooChart(json) {
