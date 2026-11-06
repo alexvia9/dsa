@@ -8,5 +8,6 @@ export function cloneInvestmentStrategy(s: InvestmentStrategy): InvestmentStrate
   return {
     mode: 'monthly_end_compound',
     monthlyRatePercentByMonth: { ...s.monthlyRatePercentByMonth },
+    ...(s.capCents !== undefined ? { capCents: s.capCents } : {}),
   }
 }

@@ -21,11 +21,17 @@ import {
   monthGrowthBreakdown,
 } from '../lib/accountGrowth'
 import { formatMonthYearLabel } from '../lib/formatMonthYm'
+import { MonthEndCapChoice } from '../components/MonthEndCapChoice'
 import { cloneInvestmentStrategy } from '../lib/cloneStrategy'
 import { signedLedgerAmountCents } from '../lib/ledger'
 import { formatUsd, parseUsdToCents } from '../lib/money'
+import {
+  monthEndExcessCents,
+  monthEndStrategy,
+  readMonthEndCapCents,
+} from '../lib/monthEndCap'
 import { accountTypeForMode } from '../lib/accountTypeCatalog'
-import { strategySummary } from '../lib/strategyLabel'
+import { growthExplanation, strategySummary } from '../lib/strategyLabel'
 import type {
   Account,
   DepositRecord,
@@ -407,6 +413,11 @@ export function AccountPage() {
   const kid = kidById.get(account.kidId)
   const metrics = getAccountGrowthMetrics(account, deposits)
   const product = accountTypeForMode(account.strategy.mode)
+  const learningCapCents = readMonthEndCapCents(account.strategy)
+  const excessCents =
+    learningCapCents === undefined
+      ? 0
+      : monthEndExcessCents(metrics.totalValueCents, learningCapCents)
   const growthClass =
     metrics.growthCents > 0
       ? 'account-fidelity-change--positive'
@@ -488,12 +499,7 @@ export function AccountPage() {
       strategyDraft ??
       null
     if (!toSave || toSave.mode !== 'monthly_end_compound') return
-    setStrategy(accountId, {
-      mode: 'monthly_end_compound',
-      monthlyRatePercentByMonth: {
-        ...toSave.monthlyRatePercentByMonth,
-      },
-    })
+    setStrategy(accountId, cloneInvestmentStrategy(toSave))
     strategyDialogRef.current?.close()
   }
 
@@ -575,7 +581,7 @@ export function AccountPage() {
               className="btn secondary btn-compact account-fidelity-head-action"
               onClick={openStrategyModal}
             >
-              Edit rates
+              Edit cap and rates
             </button>
           ) : null}
         </div>
@@ -606,6 +612,17 @@ export function AccountPage() {
             <dt>Growth</dt>
             <dd>{strategySummary(account.strategy)}</dd>
           </div>
+          {learningCapCents !== undefined ? (
+            <div className="account-fidelity-meta-item">
+              <dt>Learning cap</dt>
+              <dd>
+                {formatUsd(learningCapCents)}
+                {excessCents > 0
+                  ? ` · ${formatUsd(excessCents)} past cap`
+                  : ''}
+              </dd>
+            </div>
+          ) : null}
           <div className="account-fidelity-meta-item">
             <dt>Opened</dt>
             <dd>{formatRecordedDate(metrics.startDate)}</dd>
@@ -653,6 +670,14 @@ export function AccountPage() {
         ) : null}
       </section>
 
+      {learningCapCents !== undefined && excessCents > 0 ? (
+        <MonthEndCapChoice
+          account={account}
+          capCents={learningCapCents}
+          excessCents={excessCents}
+        />
+      ) : null}
+
       <section
         className="account-fidelity-panel account-growth-explainer"
         aria-labelledby="account-growth-explainer-title"
@@ -664,7 +689,7 @@ export function AccountPage() {
           How growth works
         </h2>
         <p className="account-fidelity-panel-lede account-growth-explainer-body">
-          {product.howItWorks}
+          {growthExplanation(account.strategy)}
         </p>
       </section>
 
@@ -721,10 +746,11 @@ export function AccountPage() {
                 ? {
                     rates: account.strategy.monthlyRatePercentByMonth,
                     onRatesChange: (next) => {
-                      setStrategy(accountId, {
-                        mode: 'monthly_end_compound',
-                        monthlyRatePercentByMonth: next,
-                      })
+                      if (account.strategy.mode !== 'monthly_end_compound') return
+                      setStrategy(
+                        accountId,
+                        monthEndStrategy(next, account.strategy.capCents),
+                      )
                     },
                   }
                 : null
@@ -755,7 +781,7 @@ export function AccountPage() {
           <div className="strategy-modal-box">
             <header className="strategy-modal-header">
               <h2 id="strategy-modal-title" className="strategy-modal-title">
-                Month-end rates
+                Month-end cap and rates
               </h2>
               <button
                 type="button"
@@ -789,7 +815,7 @@ export function AccountPage() {
                 className="btn primary"
                 onClick={saveStrategyFromModal}
               >
-                Save rates
+                Save
               </button>
             </footer>
           </div>

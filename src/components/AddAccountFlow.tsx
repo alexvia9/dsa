@@ -194,8 +194,8 @@ export function AddAccountFlow({
                 Add an account
               </span>
               <span className="kid-add-account-prominent-lede">
-                Pick a savings, market, or piggy-bank style account to start
-                teaching {kidName}.
+                Name it save, give, or spend, then pick piggy bank or month-end.
+                Savings and the market are open whenever you want them.
               </span>
             </button>
           </li>

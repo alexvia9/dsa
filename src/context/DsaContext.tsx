@@ -86,6 +86,7 @@ type DsaContextValue = {
     sourceAccountId: string,
     targetAccountId: string,
     amountCents: number,
+    note?: string,
   ) => boolean
   closeKid: (kidId: string) => boolean
   setStrategy: (accountId: string, strategy: InvestmentStrategy) => void
@@ -489,6 +490,7 @@ export function DsaProvider({
       sourceAccountId: string,
       targetAccountId: string,
       amountCents: number,
+      note?: string,
     ) => {
       let ok = false
       setState((s) => {
@@ -501,8 +503,8 @@ export function DsaProvider({
 
         const now = new Date().toISOString()
         const recordedAt = localDateString()
-        const note = normalizeLedgerNote(
-          transferFromAccountNote(source.name),
+        const noteText = normalizeLedgerNote(
+          note?.trim() || transferFromAccountNote(source.name),
         )
 
         ok = true
@@ -515,7 +517,7 @@ export function DsaProvider({
               accountId: sourceAccountId,
               kind: 'withdrawal' as const,
               amountCents: amount,
-              note,
+              note: noteText,
               recordedAt,
               createdAt: now,
             },
@@ -524,7 +526,7 @@ export function DsaProvider({
               accountId: targetAccountId,
               kind: 'deposit' as const,
               amountCents: amount,
-              note,
+              note: noteText,
               recordedAt,
               createdAt: now,
             },

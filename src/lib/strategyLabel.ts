@@ -1,4 +1,6 @@
 import { accountTypeForMode } from './accountTypeCatalog'
+import { readMonthEndCapCents } from './monthEndCap'
+import { formatUsd } from './money'
 import type { InvestmentStrategy } from '../types/dsa'
 
 export type StrategySummaryOptions = {
@@ -20,11 +22,27 @@ export function strategySummary(
     }
     case 'savings_apr':
       return `${accountName} · ${s.annualRatePercent}%`
-    case 'monthly_end_compound':
-      return accountName
+    case 'monthly_end_compound': {
+      const cap = readMonthEndCapCents(s)
+      return cap === undefined
+        ? accountName
+        : `${accountName} · cap ${formatUsd(cap)}`
+    }
     case 'piggy_bank':
       return accountName
   }
+}
+
+/** Account-page explanation. Month-end mentions this jar's cap when one is set. */
+export function growthExplanation(s: InvestmentStrategy): string {
+  if (s.mode !== 'monthly_end_compound') {
+    return accountTypeForMode(s.mode).howItWorks
+  }
+  const cap = readMonthEndCapCents(s)
+  if (cap === undefined) {
+    return 'Money still moves on deposit and withdrawal dates. The percentage for a month applies once at month-end on the full balance. Set a learning cap when dollars above it should stop earning this rate.'
+  }
+  return `Money still moves on deposit and withdrawal dates. The month-end percentage applies once, and only to the balance up to ${formatUsd(cap)}. Anything above that earns nothing until you move it to savings or the market.`
 }
 
 /** One sentence describing what drives rule-based growth (chart window copy). */
@@ -34,8 +52,13 @@ export function strategyGrowthBasisLine(s: InvestmentStrategy): string {
       return 'No growth rate—only deposits and withdrawals move the balance.'
     case 'savings_apr':
       return `Smooth daily interest from your ${s.annualRatePercent}% annual rate (APR).`
-    case 'monthly_end_compound':
-      return 'Month-end compounding using the growth % you set for each calendar month.'
+    case 'monthly_end_compound': {
+      const cap = readMonthEndCapCents(s)
+      if (cap === undefined) {
+        return 'Month-end compounding using the growth % you set for each calendar month, on the full balance.'
+      }
+      return `Month-end compounding on the balance up to ${formatUsd(cap)}. Anything above that cap does not earn this rate.`
+    }
     case 'stock_market':
       return 'Daily S&P 500 (SPY) close-to-close returns from bundled history, with a small teaching rate on recent weekdays when the latest trading day is not in the file yet.'
   }

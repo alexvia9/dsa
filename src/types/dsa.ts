@@ -17,6 +17,11 @@ export type InvestmentStrategy =
       mode: 'monthly_end_compound'
       /** YYYY-MM → percent applied once at that month’s end on the balance */
       monthlyRatePercentByMonth: Record<string, number>
+      /**
+       * Balance cap in cents. Month-end growth applies only up to this amount.
+       * Omitted means no cap (the full balance compounds).
+       */
+      capCents?: number
     }
   | {
       /** Cash jar: balance only changes with deposits and withdrawals (no yield). */

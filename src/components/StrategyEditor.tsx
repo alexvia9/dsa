@@ -4,6 +4,11 @@ import {
   accountTypeForMode,
 } from '../lib/accountTypeCatalog'
 import { formatMonthYearLabel } from '../lib/formatMonthYm'
+import {
+  DEFAULT_MONTH_END_CAP_CENTS,
+  monthEndStrategy,
+} from '../lib/monthEndCap'
+import { parseUsdToCents } from '../lib/money'
 import { StrategyTypeCardIcon } from './icons/StrategyTypeIcons'
 import { MonthEndRatesByLedgerMonth } from './MonthEndRatesByLedgerMonth'
 import type { InvestmentStrategy } from '../types/dsa'
@@ -53,13 +58,14 @@ function StrategyEditorFull({
         })
         break
       case 'monthly_end_compound':
-        onChange({
-          mode: 'monthly_end_compound',
-          monthlyRatePercentByMonth:
-            strategy.mode === 'monthly_end_compound'
-              ? { ...strategy.monthlyRatePercentByMonth }
-              : {},
-        })
+        onChange(
+          strategy.mode === 'monthly_end_compound'
+            ? monthEndStrategy(
+                { ...strategy.monthlyRatePercentByMonth },
+                strategy.capCents,
+              )
+            : monthEndStrategy({}, DEFAULT_MONTH_END_CAP_CENTS),
+        )
         break
       case 'stock_market':
         onChange({
@@ -210,8 +216,16 @@ function StrategyEditorFull({
       {strategy.mode === 'monthly_end_compound' && (
         <MonthlyRatesEditor
           rates={strategy.monthlyRatePercentByMonth}
+          capCents={strategy.capCents}
           onChange={(monthlyRatePercentByMonth) =>
-            onChange({ mode: 'monthly_end_compound', monthlyRatePercentByMonth })
+            onChange(
+              monthEndStrategy(monthlyRatePercentByMonth, strategy.capCents),
+            )
+          }
+          onCapChange={(capCents) =>
+            onChange(
+              monthEndStrategy(strategy.monthlyRatePercentByMonth, capCents),
+            )
           }
         />
       )}
@@ -236,14 +250,22 @@ export function StrategyEditor({
       <div className="strategy-editor strategy-editor-type-locked">
         <p className="muted small strategy-type-locked-lede">
           Growth type: {monthEndType.accountName} (
-          {monthEndType.technicalLabel}). You can add or change the percentage
-          for each month-end.
+          {monthEndType.technicalLabel}). Set a learning cap, and add or change
+          the percentage for each month-end.
         </p>
         <MonthlyRatesEditor
           layout="accountEditModal"
           rates={strategy.monthlyRatePercentByMonth}
+          capCents={strategy.capCents}
           onChange={(monthlyRatePercentByMonth) =>
-            onChange({ mode: 'monthly_end_compound', monthlyRatePercentByMonth })
+            onChange(
+              monthEndStrategy(monthlyRatePercentByMonth, strategy.capCents),
+            )
+          }
+          onCapChange={(capCents) =>
+            onChange(
+              monthEndStrategy(strategy.monthlyRatePercentByMonth, capCents),
+            )
           }
           accountModalLedgerMonthsDescending={typeLockedLedgerMonths ?? []}
           accountModalFirstMonthKey={
@@ -338,15 +360,90 @@ function EditableTableRateCell({
   )
 }
 
+function centsToDollarInput(cents: number): string {
+  const dollars = cents / 100
+  return Number.isInteger(dollars) ? String(dollars) : dollars.toFixed(2)
+}
+
+function MonthEndCapField({
+  capCents,
+  onCapChange,
+}: {
+  capCents: number | undefined
+  onCapChange: (capCents: number | undefined) => void
+}) {
+  const [text, setText] = useState(() =>
+    capCents === undefined ? '' : centsToDollarInput(capCents),
+  )
+  const [focused, setFocused] = useState(false)
+  const [seenCap, setSeenCap] = useState(capCents)
+
+  if (!focused && capCents !== seenCap) {
+    setSeenCap(capCents)
+    setText(capCents === undefined ? '' : centsToDollarInput(capCents))
+  }
+
+  return (
+    <label className="field month-end-cap-field">
+      <span className="label">Learning cap ($)</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        className="input"
+        value={text}
+        placeholder="No cap"
+        aria-label="Learning cap in dollars"
+        onChange={(e) => {
+          const next = e.target.value
+          setText(next)
+          const trimmed = next.trim()
+          if (trimmed === '') {
+            onCapChange(undefined)
+            return
+          }
+          const cents = parseUsdToCents(trimmed)
+          if (cents != null) onCapChange(cents)
+        }}
+        onFocus={() => setFocused(true)}
+        onBlur={(e) => {
+          setFocused(false)
+          const trimmed = e.target.value.trim()
+          if (trimmed === '') {
+            onCapChange(undefined)
+            setText('')
+            return
+          }
+          const cents = parseUsdToCents(trimmed)
+          if (cents == null) {
+            setText(capCents === undefined ? '' : centsToDollarInput(capCents))
+            return
+          }
+          onCapChange(cents)
+          setText(centsToDollarInput(cents))
+        }}
+      />
+      <span className="hint">
+        Month-end growth applies only up to this balance. Leave blank for no
+        cap. Money above the cap does not earn the month-end rate until it
+        moves to savings or the market.
+      </span>
+    </label>
+  )
+}
+
 function MonthlyRatesEditor({
   rates,
+  capCents,
   onChange,
+  onCapChange,
   layout = 'default',
   accountModalLedgerMonthsDescending,
   accountModalFirstMonthKey,
 }: {
   rates: Record<string, number>
+  capCents: number | undefined
   onChange: (r: Record<string, number>) => void
+  onCapChange: (capCents: number | undefined) => void
   layout?: 'default' | 'accountEditModal'
   /** With `layout="accountEditModal"`, ledger months merged into one table with rate keys. */
   accountModalLedgerMonthsDescending?: string[]
@@ -393,6 +490,7 @@ function MonthlyRatesEditor({
         (isAccountEditModal ? ' monthly-rates--account-edit-modal' : '')
       }
     >
+      <MonthEndCapField capCents={capCents} onCapChange={onCapChange} />
       <p className="hint monthly-rates-hint">
         {isAccountEditModal
           ? 'Choose a month, enter a rate, and add it. Edit % in the table; Remove clears that month’s saved rate so it inherits from an earlier month (or 0%).'

@@ -33,7 +33,7 @@ export const ACCOUNT_TYPE_BY_MODE: Record<
     howItWorks:
       'The balance only changes when you deposit or withdraw—nothing is added by growth rules.',
     teachingContext:
-      'Best as a simple comparison when you’re teaching, or for money set aside for donations.',
+      'One way to run a save, give, or spend jar. Nothing grows, so you can compare it with a month-end jar.',
   },
   savings_apr: {
     accountName: 'Standard Savings (APY)',
@@ -43,7 +43,7 @@ export const ACCOUNT_TYPE_BY_MODE: Record<
     howItWorks:
       'You set one annual rate; the simulator applies a small daily slice of that rate so the balance rises smoothly, like a high-yield savings teaching model.',
     teachingContext:
-      'Best for showing how slow, steady growth works and for introducing APY.',
+      'Open any time. Steady, uncapped growth for money that has outgrown a month-end jar.',
   },
   monthly_end_compound: {
     accountName: 'Month-End',
@@ -52,9 +52,9 @@ export const ACCOUNT_TYPE_BY_MODE: Record<
     vibeBecause:
       'it only calculates growth from the balance on the last day of each month.',
     howItWorks:
-      'Money still moves on deposit and withdrawal dates, but the percentage for a month is applied once at that month’s end on the balance—using the month-by-month rates you set.',
+      'Money still moves when you deposit or withdraw. Once a month, the percentage you set applies only to the balance up to a learning cap. Anything above the cap earns nothing until you move it to savings or the market.',
     teachingContext:
-      'Best for teaching compounding—especially motivating for newer investors. Month-end percentages can work as rewards or recognition for the month.',
+      'The other way to run a save, give, or spend jar. The rate can be generous because the cap keeps it small.',
   },
   stock_market: {
     accountName: 'Market Index',
@@ -65,7 +65,7 @@ export const ACCOUNT_TYPE_BY_MODE: Record<
     howItWorks:
       "Each trading day, growth follows the real S&P 500 using the SPY ETF (from one market close to the next). Weekends and market holidays stay flat. When you open the app, we pick up the latest published daily returns. If today's close isn't available yet, a simple ~7% annual teaching estimate is used for that day only.",
     teachingContext:
-      'Best for real-world context and comparison examples. A good next step after they understand growth basics and feel excited about it.',
+      'Open any time. Real S&P 500 moves, including down months, for money that has outgrown a month-end jar.',
   },
 }
 
@@ -85,7 +85,7 @@ export const GROWTH_MODEL_ONE_LINE: Record<StrategyMode, string> = {
   savings_apr:
     'One fixed yearly rate, smoothed into small daily growth (like HYSA).',
   monthly_end_compound:
-    'You set a % per month; it applies once at month-end on the balance.',
+    'You set a % per month and a cap. The % applies once at month-end, only up to that cap.',
   stock_market:
     "S&P 500 via SPY daily returns; flat on weekends and holidays. Uses a ~7% teaching estimate until today's close is published.",
 }

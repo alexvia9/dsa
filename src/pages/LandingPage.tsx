@@ -1,37 +1,15 @@
 import { useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { AccountTypesOverview } from '../components/AccountTypesOverview'
 import { LandingProductPreview } from '../components/LandingProductPreview'
 import { DsaLogoMark, DsaMonogram } from '../components/DsaLogoMark'
-import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
-import {
-  GROWTH_MODEL_ONE_LINE,
-  accountTypeForMode,
-} from '../lib/accountTypeCatalog'
 import { useAuth } from '../context/AuthContext'
 import { isSupabaseConfigured } from '../lib/supabaseClient'
-import type { InvestmentStrategy } from '../types/dsa'
-
-const ACCOUNT_TYPE_MODES = [
-  'piggy_bank',
-  'savings_apr',
-  'monthly_end_compound',
-  'stock_market',
-] as const satisfies readonly InvestmentStrategy['mode'][]
-
-const PRODUCT_SPECS: Record<
-  InvestmentStrategy['mode'],
-  { spec: string; tag: string }
-> = {
-  piggy_bank: { spec: '0% · cash only', tag: 'Spend' },
-  savings_apr: { spec: 'Fixed APY · daily accrual', tag: 'Save' },
-  monthly_end_compound: { spec: 'Custom % · month-end', tag: 'Give' },
-  stock_market: { spec: 'S&P 500 · SPY daily', tag: 'Invest' },
-}
 
 const FEATURES = [
   {
     title: 'All jars in one view',
-    body: 'See spend, save, give, and invest for every child—no more counting cash across the counter or digging through envelopes.',
+    body: 'See save, give, and spend for every child—no more counting cash across the counter or digging through envelopes.',
   },
   {
     title: 'Quick to update',
@@ -113,16 +91,16 @@ export function LandingPage() {
             <ul className="landing-trust-row" aria-label="Product highlights">
               <li>Easy to track</li>
               <li>No real money moved</li>
-              <li>Save · spend · give · invest</li>
+              <li>Save · give · spend</li>
             </ul>
             <h1 className="landing-headline">
               The simple way to track your kids&apos; money
             </h1>
             <p className="landing-lede">
-              DSA replaces piggy banks and envelope jars with one clear view. You
-              still hold the cash—we just make it easier to see what each child
-              has for spending, saving, giving, and investing. A teaching tool
-              that saves you the hassle, not another account to manage.
+              DSA replaces envelope jars with one clear view. You still hold the
+              cash. Save, give, and spend are the jars—compare a piggy bank with
+              month-end growth, and open savings or the market when that money
+              should grow for real.
             </p>
             <div className="landing-hero-actions">
               {cloud ? (
@@ -181,50 +159,11 @@ export function LandingPage() {
           </ul>
         </section>
 
-        <section className="landing-section">
-          <div className="landing-section-head">
-            <h2 className="landing-section-title">Four jars, zero clutter</h2>
-            <p className="landing-section-lede">
-              The same Moonjar or envelope split you already use—digital, per
-              child, and always easy to check.
-            </p>
-          </div>
-          <ul className="strategy-type-card-grid landing-type-grid">
-            {ACCOUNT_TYPE_MODES.map((mode) => {
-              const catalog = accountTypeForMode(mode)
-              const product = PRODUCT_SPECS[mode]
-              return (
-                <li
-                  key={mode}
-                  className={
-                    'strategy-type-card strategy-type-card--' +
-                    mode +
-                    ' strategy-type-card--selected landing-type-card'
-                  }
-                >
-                  <div className="strategy-type-card-top">
-                    <span className="strategy-type-card-icon-wrap" aria-hidden>
-                      <StrategyTypeCardIcon mode={mode} />
-                    </span>
-                    <div className="strategy-type-card-heading">
-                      <span className="strategy-type-card-title">
-                        {catalog.accountName}
-                      </span>
-                      <span className="strategy-type-card-vibe">
-                        {catalog.vibeWord}
-                      </span>
-                    </div>
-                    <span className="landing-product-tag">{product.tag}</span>
-                  </div>
-                  <span className="landing-product-spec">{product.spec}</span>
-                  <span className="strategy-type-card-desc">
-                    {GROWTH_MODEL_ONE_LINE[mode]}
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
+        <AccountTypesOverview
+          variant="landing"
+          title="Save, give, and spend"
+          lede="Those are the jars. Run any of them as a piggy bank or a month-end account and compare the two. Savings and the market stay available the whole time."
+        />
 
         <section className="landing-cta">
           <div className="landing-cta-inner">

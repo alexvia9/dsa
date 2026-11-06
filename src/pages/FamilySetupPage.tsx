@@ -16,8 +16,8 @@ export function FamilySetupPage() {
             </h1>
             <p id="family-setup-add-desc" className="family-setup-add-lede">
               Set up their profile, then open accounts and log deposits and
-              withdrawals you control—so they learn how saving, spending, and
-              investing really work.
+              withdrawals you control—so they can compare a piggy bank with
+              month-end growth on save, give, and spend.
             </p>
             <AddChildFlow
               variant="standalone"
@@ -38,7 +38,7 @@ export function FamilySetupPage() {
       <AccountTypesOverview
         variant="landing"
         title="What you'll set up on their page"
-        lede="Spending jars, savings, goals, and market-style lines—the same account types you&apos;ll use to teach as they grow."
+        lede="Save, give, and spend jars. Compare a piggy bank with month-end, and open savings or the market whenever you want."
       />
     </div>
   )

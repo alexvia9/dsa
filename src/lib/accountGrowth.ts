@@ -8,6 +8,7 @@ import {
   signedLedgerAmountCents,
   sumNetLedgerCents,
 } from './ledger'
+import { applyMonthEndGrowth, readMonthEndCapCents } from './monthEndCap'
 import { sp500MarketDailyFactor } from './sp500Market'
 
 function ledgerDay(d: DepositRecord): string {
@@ -183,6 +184,7 @@ function simulateMonthlyEnd(
   rates: Record<string, number>,
   startDate: string,
   endDate: string,
+  capCents: number | undefined,
 ): number {
   let balance = 0
   const [sy, sm] = startDate.split('-').map(Number)
@@ -210,9 +212,7 @@ function simulateMonthlyEnd(
       if (explicit !== undefined) {
         carriedPercent = explicit
       }
-      if (balance > 0) {
-        balance *= 1 + carriedPercent / 100
-      }
+      balance = applyMonthEndGrowth(balance, carriedPercent, capCents)
     }
 
     if (y === ey && m === em) break
@@ -243,6 +243,7 @@ function simulateTotalValueCents(
       strategy.monthlyRatePercentByMonth,
       startDate,
       endDate,
+      readMonthEndCapCents(strategy),
     )
   }
   return simulateDailyCompound(strategy, deposits, startDate, endDate)

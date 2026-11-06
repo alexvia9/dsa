@@ -325,7 +325,9 @@ export function KidPage() {
 
         {accounts.length === 0 ? (
           <p className="account-fidelity-empty-hint">
-            Add an account below to start teaching {kid.name} how money grows.
+            Open save, give, and spend jars for {kid.name}. Compare a piggy
+            bank with a month-end account. Savings and the market are there
+            when you want them.
           </p>
         ) : null}
 
