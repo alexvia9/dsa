@@ -1,5 +1,5 @@
 /**
- * Feature flags for gradual rollout. Flip when backend / AI wiring is ready.
+ * Feature flags for gradual rollout.
  */
 export const features = {
   /**
@@ -8,10 +8,4 @@ export const features = {
    * whose terms allow that illustration inside this app. See README.
    */
   marketDataSource: 'yahoo-chart',
-  /**
-   * Plain-language performance summary. Keep off until a vendor agreement
-   * is in place. The prompt must explain rules already applied to the
-   * pretend balance and must not recommend a purchase, sale, or allocation.
-   */
-  performanceAiInsight: false,
 } as const

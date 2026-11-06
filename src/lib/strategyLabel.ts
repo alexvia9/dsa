@@ -45,21 +45,21 @@ export function growthExplanation(s: InvestmentStrategy): string {
   return `Money still moves on deposit and withdrawal dates. The month-end percentage applies once, and only to the balance up to ${formatUsd(cap)}. Anything above that earns nothing until you move it to an account that grows like savings or like the market.`
 }
 
-/** One sentence describing what drives rule-based growth (chart window copy). */
-export function strategyGrowthBasisLine(s: InvestmentStrategy): string {
+/** One short line under the performance numbers. Details stay in “How growth works”. */
+export function strategyGrewLine(s: InvestmentStrategy): string {
   switch (s.mode) {
     case 'piggy_bank':
-      return 'No growth rate—only deposits and withdrawals move the balance.'
+      return 'This jar does not grow on its own. Grew stays $0.00.'
     case 'savings_apr':
-      return `Smooth daily interest from your ${s.annualRatePercent}% annual rate, like a savings account (APY). The balance is pretend.`
+      return `Grew is extra from the ${s.annualRatePercent}% savings rate.`
     case 'monthly_end_compound': {
       const cap = readMonthEndCapCents(s)
       if (cap === undefined) {
-        return 'Month-end compounding using the growth % you set for each calendar month, on the full balance.'
+        return 'Grew is extra added at the end of each month.'
       }
-      return `Month-end compounding on the balance up to ${formatUsd(cap)}. Anything above that cap does not earn this rate.`
+      return `Grew is extra added at the end of each month, only on money up to ${formatUsd(cap)}.`
     }
     case 'stock_market':
-      return 'Illustration of the published SPY close-to-close change (source: Yahoo Finance) on a pretend balance, with a ~7% yearly teaching rate until that day’s close is in. Not a quote and not shares of SPY.'
+      return 'Grew is the pretend market moving this money up or down.'
   }
 }

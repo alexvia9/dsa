@@ -236,8 +236,7 @@
   border-bottom: 1px solid var(--fidelity-border);
 }
 
-:is(.kid-page, .account-page) .account-fidelity-panel-lede,
-:is(.kid-page, .account-page) .account-growth-chart-caption {
+:is(.kid-page, .account-page) .account-fidelity-panel-lede {
   margin: 0;
   max-width: 42rem;
   font-size: 0.8125rem;
@@ -253,12 +252,7 @@
 }
 
 :is(.kid-page, .account-page)
-  :is(
-    .account-fidelity-metrics,
-    .account-growth-chart-window-summary,
-    .performance-ai-insight,
-    .deposit-month-summary
-  ) {
+  :is(.account-fidelity-metrics, .performance-readout) {
   border: 1px solid var(--fidelity-border);
   border-radius: calc(var(--fidelity-radius) - 0.05rem);
   background: var(--fidelity-inset);
@@ -309,18 +303,9 @@
   margin: 0.75rem 0 0;
 }
 
-:is(.kid-page, .account-page) .account-growth-chart-window-summary,
-:is(.kid-page, .account-page) .performance-ai-insight {
+.account-growth-chart-card .performance-readout {
+  margin-top: 0.75rem;
   margin-bottom: 0.75rem;
-}
-
-:is(.kid-page, .account-page) .account-growth-chart-window-summary {
-  padding: 0.75rem 1rem;
-  max-width: none;
-}
-
-:is(.kid-page, .account-page) .performance-ai-insight {
-  padding: 0.75rem 1rem;
 }
 
 :is(.kid-page, .account-page) .deposit-month-block {
@@ -2183,6 +2168,12 @@
   line-height: 1;
 }
 
+.account-growth-trend-period {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
 .account-growth-trend--up {
   color: #15803d;
 }
@@ -3514,36 +3505,67 @@
   min-width: 0;
 }
 
-.deposit-month-summary {
+.performance-readout-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem 1rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 0.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem 1rem;
+}
+
+@media (min-width: 720px) {
+  .performance-readout-metrics {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.performance-readout {
+  padding: 0.85rem 1rem;
+  border-radius: 1.15rem;
   border: 1px solid var(--border);
   background: var(--surface);
   font-size: 0.8rem;
 }
 
-.deposit-month-metric {
+.performance-readout-metric {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
   min-width: 0;
 }
 
-.deposit-month-metric-label {
-  font-size: 0.65rem;
+.performance-readout-label {
+  font-size: 0.78rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.01em;
   color: var(--muted);
 }
 
-.deposit-month-metric-value {
+.performance-readout-value {
   font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+
+.performance-readout-value--up {
+  color: #15803d;
+}
+
+.performance-readout-value--down {
+  color: #b91c1c;
+}
+
+.performance-readout-formula,
+.performance-readout-note,
+.performance-equation {
+  margin: 0.55rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
   font-weight: 700;
-  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+.performance-readout-note {
+  margin-top: 0.2rem;
+  font-weight: 600;
 }
 
 .deposit-month-future-note,
@@ -3588,11 +3610,6 @@
   padding: 0.55rem 0.75rem;
 }
 
-@media (max-width: 520px) {
-  .deposit-month-summary {
-    grid-template-columns: 1fr;
-  }
-}
 
 .deposit-section-lede {
   margin: 0 0 1rem;
@@ -4300,88 +4317,14 @@
   font-weight: 700;
 }
 
-.account-growth-chart-caption {
-  margin: 0 0 0.75rem;
-  max-width: 36rem;
-}
-
-.account-growth-chart-window-summary {
-  font-size: 0.875rem;
-  line-height: 1.45;
-}
-
-.account-growth-chart-window-summary p {
-  margin: 0.4rem 0 0;
-}
-
-.account-growth-chart-window-summary p:first-child {
-  margin-top: 0;
-}
-
 .account-growth-chart-window-heading {
-  font-size: 0.9375rem;
+  margin: 0 0 0.45rem;
+  font-size: 0.95rem;
 }
 
 .account-growth-chart-window-dates {
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.account-growth-chart-window-metric-label {
   font-weight: 600;
-}
-
-.performance-ai-insight {
-  margin: 0;
-}
-
-.performance-ai-insight-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.65rem;
-  margin-bottom: 0.45rem;
-}
-
-.performance-ai-insight-title {
-  margin: 0;
-  font-family: 'DM Sans', system-ui, sans-serif;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--fidelity-navy);
-}
-
-.performance-ai-insight-badge {
-  display: inline-block;
-  padding: 0.12rem 0.45rem;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #0b5cab;
-  background: rgba(11, 92, 171, 0.1);
-  border-radius: 0.25rem;
-}
-
-.performance-ai-insight-lede {
-  margin: 0 0 0.65rem;
-  max-width: 40rem;
-  font-size: 0.8125rem;
-  line-height: 1.5;
-  color: var(--fidelity-muted);
-}
-
-.performance-ai-insight-cta:disabled {
-  opacity: 0.72;
-  cursor: not-allowed;
-}
-
-.account-growth-chart-window-metric-hint {
-  font-weight: 400;
-}
-
-.account-growth-chart-window-flows-value {
-  font-variant-numeric: tabular-nums;
+  color: var(--muted);
 }
 
 .account-growth-chart-svg-wrap {
@@ -6159,21 +6102,13 @@
     0 8px 14px rgba(0, 133, 66, 0.24);
 }
 
-.account-page .deposit-month-summary {
+.account-page .performance-readout {
   border: none;
-  border-radius: 1.15rem;
   background: linear-gradient(160deg, #fffaf0 0%, #ffe8cc 100%);
-  padding: 0.85rem 1rem;
   box-shadow: 0 3px 0 rgba(12, 35, 64, 0.05);
 }
 
-.account-page .deposit-month-metric-label {
-  text-transform: none;
-  letter-spacing: -0.01em;
-  font-size: 0.78rem;
-}
-
-.account-page .deposit-month-metric-value {
+.account-page .performance-readout-value {
   font-family: 'Nunito', system-ui, sans-serif;
   font-size: 1.05rem;
   font-weight: 800;
@@ -7139,17 +7074,19 @@
 }
 
 @media (max-width: 640px) {
-  .account-page .deposit-month-summary {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.35rem 0.45rem;
+  .account-page .performance-readout {
     padding: 0.7rem 0.75rem;
   }
 
-  .account-page .deposit-month-metric-label {
+  .account-page .performance-readout-metrics {
+    gap: 0.55rem 0.45rem;
+  }
+
+  .account-page .performance-readout-label {
     font-size: 0.72rem;
   }
 
-  .account-page .deposit-month-metric-value {
+  .account-page .performance-readout-value {
     font-size: 0.95rem;
   }
 }

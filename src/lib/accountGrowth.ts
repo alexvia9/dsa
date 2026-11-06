@@ -465,9 +465,11 @@ export type AccountListGrowthTrend = {
 }
 
 /**
- * Rule-based growth snippet for account list rows (kid page, family mini list).
+ * Grew amount for account list rows (kid page).
  * Returns null when the account has no positive balance or when the type has
  * no growth rule to summarize (piggy bank).
+ * Savings and market show today. Month-end shows last month, because that
+ * rate is added once at month-end.
  */
 export function accountListGrowthTrend(
   account: Account,
@@ -502,7 +504,7 @@ export function accountListGrowthTrend(
     )
     const flowToday = netLedgerFlowOnDate(deposits, todayYmd)
     const growthDelta = vToday - vYest - flowToday
-    return { deltaCents: growthDelta, periodLabel: 'Last day' }
+    return { deltaCents: growthDelta, periodLabel: 'today' }
   }
 
   const trendYm = previousMonthLastDayYmd(todayYmd.slice(0, 7)).slice(0, 7)
@@ -512,5 +514,5 @@ export function accountListGrowthTrend(
     trendYm,
     todayYmd,
   )
-  return { deltaCents: growthCents, periodLabel: 'Last month-end' }
+  return { deltaCents: growthCents, periodLabel: 'last month' }
 }

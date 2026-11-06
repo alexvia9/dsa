@@ -130,7 +130,7 @@ function MonthEndGrowthRow({
     return (
       <div className="inline-form month-growth-header-edit name-heading">
         <label className="month-growth-header-edit-label">
-          <span className="label">Growth</span>
+          <span className="label">Rate</span>
           <span className="month-growth-header-edit-inner">
             <input
               type="text"
@@ -193,7 +193,7 @@ function MonthEndGrowthRow({
     return (
       <div className="title-row month-growth-header-static name-heading">
         <p className="month-growth-header-readout">
-          <span className="month-growth-header-readout-label">Growth</span>
+          <span className="month-growth-header-readout-label">Rate</span>
           <span className="month-growth-header-readout-value">
             {formatPctReadout(effective)}%
           </span>

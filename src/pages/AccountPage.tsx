@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
 import { AccountGrowthChart } from '../components/AccountGrowthChart'
+import { PerformanceReadout } from '../components/PerformanceReadout'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { LedgerMonthEndGrowthField } from '../components/MonthEndRatesByLedgerMonth'
 import { StrategyEditor } from '../components/StrategyEditor'
@@ -26,7 +27,7 @@ import { formatMonthYearLabel } from '../lib/formatMonthYm'
 import { MonthEndCapChoice } from '../components/MonthEndCapChoice'
 import { cloneInvestmentStrategy } from '../lib/cloneStrategy'
 import { signedLedgerAmountCents } from '../lib/ledger'
-import { formatUsd, parseUsdToCents } from '../lib/money'
+import { formatUsd, formatUsdSigned, parseUsdToCents } from '../lib/money'
 import {
   monthEndExcessCents,
   monthEndStrategy,
@@ -192,34 +193,31 @@ function AccountLedgerSection({
                 ) : null}
               </div>
               {breakdown && (
-                <div
-                  className="deposit-month-summary"
-                  role="group"
-                  aria-label={`${formatMonthYearLabel(ym)} balance summary`}
-                >
-                  <div className="deposit-month-metric">
-                    <span className="deposit-month-metric-label">
-                      Total start
-                    </span>
-                    <span className="deposit-month-metric-value">
-                      {formatUsd(breakdown.startCents)}
-                    </span>
-                  </div>
-                  <div className="deposit-month-metric">
-                    <span className="deposit-month-metric-label">Total end</span>
-                    <span className="deposit-month-metric-value">
-                      {formatUsd(breakdown.endCents)}
-                    </span>
-                  </div>
-                  <div className="deposit-month-metric">
-                    <span className="deposit-month-metric-label">
-                      Total growth
-                    </span>
-                    <span className="deposit-month-metric-value">
-                      {formatUsd(breakdown.growthCents)}
-                    </span>
-                  </div>
-                </div>
+                <PerformanceReadout
+                  ariaLabel={`${formatMonthYearLabel(ym)} balance`}
+                  items={[
+                    { label: 'Started', cents: breakdown.startCents },
+                    {
+                      label: 'In or out',
+                      cents: breakdown.netFlowInMonthCents,
+                      signed: true,
+                    },
+                    {
+                      label: 'Grew',
+                      cents: breakdown.growthCents,
+                      signed: true,
+                    },
+                    {
+                      label: ym === currentMonthYm ? 'Now' : 'Ended',
+                      cents: breakdown.endCents,
+                    },
+                  ]}
+                  formula={
+                    ym === currentMonthYm
+                      ? 'Started + In or out + Grew = Now'
+                      : 'Started + In or out + Grew = Ended'
+                  }
+                />
               )}
             </div>
             {!showTotals && monthDeposits.length > 0 && (
@@ -610,12 +608,6 @@ export function AccountPage() {
           <p className="account-fidelity-balance">
             {formatUsd(metrics.totalValueCents)}
           </p>
-          <p className={`account-fidelity-change ${growthClass}`}>
-            <span className="account-fidelity-change-label">Total growth</span>
-            <span className="account-fidelity-change-value">
-              {formatUsd(metrics.growthCents)}
-            </span>
-          </p>
           <SimulatedBalanceNote
             showMarketIllustration={showMarketIllustration}
             showMarketEstimate={showMarketEstimate}
@@ -655,29 +647,32 @@ export function AccountPage() {
         <div
           className="account-fidelity-metrics"
           role="group"
-          aria-label="Cash flows and growth"
+          aria-label="Money in, money out, and grew"
         >
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Deposits</span>
+            <span className="account-fidelity-metric-label">Money in</span>
             <span className="account-fidelity-metric-value">
               {formatUsd(metrics.totalDepositsInCents)}
             </span>
           </div>
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Withdrawals</span>
+            <span className="account-fidelity-metric-label">Money out</span>
             <span className="account-fidelity-metric-value">
-              {formatUsd(-metrics.totalWithdrawalsCents)}
+              {formatUsd(metrics.totalWithdrawalsCents)}
             </span>
           </div>
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Net growth</span>
+            <span className="account-fidelity-metric-label">Grew</span>
             <span
               className={`account-fidelity-metric-value ${growthClass}`}
             >
-              {formatUsd(metrics.growthCents)}
+              {formatUsdSigned(metrics.growthCents)}
             </span>
           </div>
         </div>
+        <p className="performance-equation">
+          Money in − Money out + Grew = Account value
+        </p>
 
         {deposits.length === 0 ? (
           <p className="account-fidelity-empty-hint">

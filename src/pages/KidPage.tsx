@@ -17,7 +17,7 @@ import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { useDsa } from '../context/DsaContext'
 import { getAccountGrowthMetrics } from '../lib/accountGrowth'
 import { localDateString } from '../lib/dateLocal'
-import { formatUsd, parseUsdToCents } from '../lib/money'
+import { formatUsd, formatUsdSigned, parseUsdToCents } from '../lib/money'
 import { strategySummary } from '../lib/strategyLabel'
 import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
 import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
@@ -290,12 +290,6 @@ export function KidPage() {
           <p className="account-fidelity-balance">
             {formatUsd(kidPortfolioMetrics.totalValueCents)}
           </p>
-          <p className={`account-fidelity-change ${growthClass}`}>
-            <span className="account-fidelity-change-label">Total growth</span>
-            <span className="account-fidelity-change-value">
-              {formatUsd(kidPortfolioMetrics.totalGrowthCents)}
-            </span>
-          </p>
           <SimulatedBalanceNote
             showMarketIllustration={hasMarketIllustration}
             showMarketEstimate={showMarketEstimate}
@@ -322,29 +316,32 @@ export function KidPage() {
         <div
           className="account-fidelity-metrics"
           role="group"
-          aria-label="Like portfolio totals"
+          aria-label="Money in, money out, and grew"
         >
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Deposits</span>
+            <span className="account-fidelity-metric-label">Money in</span>
             <span className="account-fidelity-metric-value">
               {formatUsd(kidPortfolioMetrics.totalDepositsInCents)}
             </span>
           </div>
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Withdrawals</span>
+            <span className="account-fidelity-metric-label">Money out</span>
             <span className="account-fidelity-metric-value">
-              {formatUsd(-kidPortfolioMetrics.totalWithdrawalsCents)}
+              {formatUsd(kidPortfolioMetrics.totalWithdrawalsCents)}
             </span>
           </div>
           <div className="account-fidelity-metric">
-            <span className="account-fidelity-metric-label">Net growth</span>
+            <span className="account-fidelity-metric-label">Grew</span>
             <span
               className={`account-fidelity-metric-value ${growthClass}`}
             >
-              {formatUsd(kidPortfolioMetrics.totalGrowthCents)}
+              {formatUsdSigned(kidPortfolioMetrics.totalGrowthCents)}
             </span>
           </div>
         </div>
+        <p className="performance-equation">
+          Money in − Money out + Grew = Total value
+        </p>
 
         {accounts.length === 0 ? (
           <p className="account-fidelity-empty-hint">
@@ -510,7 +507,7 @@ export function KidPage() {
             <span className="kid-fidelity-holdings-col-account">Account</span>
             <span className="kid-fidelity-holdings-col-type">Type</span>
             <span className="kid-fidelity-holdings-col-balance">Balance</span>
-            <span className="kid-fidelity-holdings-col-change">Change</span>
+            <span className="kid-fidelity-holdings-col-change">Grew</span>
           </div>
         ) : null}
 

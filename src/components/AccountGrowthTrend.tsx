@@ -22,12 +22,13 @@ export function AccountGrowthTrend({ account, deposits }: Props) {
   return (
     <span
       className={`account-growth-trend account-growth-trend--${dir}`}
-      aria-label={`Rule-based growth ${valueText}, ${trend.periodLabel}`}
+      aria-label={`Grew ${valueText} ${trend.periodLabel}`}
     >
       <span className="account-growth-trend-arrow" aria-hidden>
         {dir === 'up' ? '↑' : dir === 'down' ? '↓' : '→'}
       </span>{' '}
       <span className="account-growth-trend-delta">{valueText}</span>
+      <span className="account-growth-trend-period">{trend.periodLabel}</span>
     </span>
   )
 }

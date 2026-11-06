@@ -8,13 +8,13 @@ import {
 } from '../lib/accountGrowthHistory'
 import { localDateString } from '../lib/dateLocal'
 import { formatUsd } from '../lib/money'
-import { strategyGrowthBasisLine } from '../lib/strategyLabel'
-import { PerformanceAiInsight } from './PerformanceAiInsight'
+import { strategyGrewLine } from '../lib/strategyLabel'
+import { PerformanceReadout } from './PerformanceReadout'
 
 const PRESETS: { id: GrowthChartRange; label: string }[] = [
-  { id: '1m', label: '1m' },
-  { id: '3m', label: '3m' },
-  { id: '1y', label: '1y' },
+  { id: '1m', label: 'Month' },
+  { id: '3m', label: '3 months' },
+  { id: '1y', label: 'Year' },
 ]
 
 const RANGE_HEADING: Record<GrowthChartRange, string> = {
@@ -63,11 +63,6 @@ function formatChartWindowRange(fromYmd: string, toYmd: string): string {
   return `${fmt.format(a)} – ${fmt.format(b)}`
 }
 
-function formatUsdGrowthSigned(cents: number): string {
-  const t = formatUsd(cents)
-  return cents > 0 ? `+${t}` : t
-}
-
 export function AccountGrowthChart({ account, deposits }: Props) {
   const [range, setRange] = useState<GrowthChartRange>('3m')
   const todayYmd = localDateString()
@@ -83,7 +78,7 @@ export function AccountGrowthChart({ account, deposits }: Props) {
     [account, deposits, range, todayYmd],
   )
 
-  const basisLine = strategyGrowthBasisLine(account.strategy)
+  const grewLine = strategyGrewLine(account.strategy)
   const windowRangeLabel = formatChartWindowRange(
     windowBreakdown.windowFromYmd,
     windowBreakdown.windowToYmd,
@@ -175,61 +170,31 @@ export function AccountGrowthChart({ account, deposits }: Props) {
           ))}
         </div>
       </div>
-      <p className="account-growth-chart-caption account-fidelity-panel-lede">
-        End-of-day balance for each date. The range is a full month, three months,
-        or one year ending <strong>today</strong>. Days before your first ledger
-        entry show <strong>$0</strong>.
+      <p className="account-growth-chart-window-heading">
+        <strong>{RANGE_HEADING[range]}</strong>
+        <span className="account-growth-chart-window-dates">
+          {' '}
+          ({windowRangeLabel})
+        </span>
       </p>
-      <div
-        className="account-growth-chart-window-summary"
-        role="region"
-        aria-label={`Growth for ${RANGE_HEADING[range]}`}
-      >
-        <p className="account-growth-chart-window-heading">
-          <strong>{RANGE_HEADING[range]}</strong>
-          <span className="account-growth-chart-window-dates">
-            {' '}
-            ({windowRangeLabel})
-          </span>
-        </p>
-        <p className="account-growth-chart-window-metric">
-          <span className="account-growth-chart-window-metric-label">
-            Growth from account rules in this window
-          </span>{' '}
-          <strong
-            className={
-              windowBreakdown.growthInWindowCents > 0
-                ? 'account-stat-value-growth-positive'
-                : windowBreakdown.growthInWindowCents < 0
-                  ? 'account-stat-value-growth-negative'
-                  : ''
-            }
-          >
-            {formatUsdGrowthSigned(windowBreakdown.growthInWindowCents)}
-          </strong>
-          <span className="muted account-growth-chart-window-metric-hint">
-            {' '}
-            — change not explained by deposits or withdrawals dated in this range.
-          </span>
-        </p>
-        <p className="muted small account-growth-chart-window-flows">
-          Net deposits and withdrawals in this window:{' '}
-          <strong className="account-growth-chart-window-flows-value">
-            {formatUsdGrowthSigned(windowBreakdown.netFlowInWindowCents)}
-          </strong>
-        </p>
-        <p className="muted small account-growth-chart-window-basis">
-          <strong>Based on:</strong> {basisLine}
-        </p>
-      </div>
-      <PerformanceAiInsight
-        account={account}
-        deposits={deposits}
-        range={range}
-        windowFromYmd={windowBreakdown.windowFromYmd}
-        windowToYmd={windowBreakdown.windowToYmd}
-        growthInWindowCents={windowBreakdown.growthInWindowCents}
-        netFlowInWindowCents={windowBreakdown.netFlowInWindowCents}
+      <PerformanceReadout
+        ariaLabel={`Performance for ${RANGE_HEADING[range]}`}
+        items={[
+          { label: 'Started', cents: windowBreakdown.startValueCents },
+          {
+            label: 'In or out',
+            cents: windowBreakdown.netFlowInWindowCents,
+            signed: true,
+          },
+          {
+            label: 'Grew',
+            cents: windowBreakdown.growthInWindowCents,
+            signed: true,
+          },
+          { label: 'Now', cents: windowBreakdown.endValueCents },
+        ]}
+        formula="Started + In or out + Grew = Now"
+        note={grewLine}
       />
       <div className="account-growth-chart-svg-wrap">
         <svg
@@ -272,39 +237,23 @@ export function AccountGrowthChart({ account, deposits }: Props) {
       </div>
       <div className="account-growth-chart-legend muted small">
         <span>
-          Low: <strong>{formatUsd(minV)}</strong>
+          Lowest: <strong>{formatUsd(minV)}</strong>
         </span>
         <span>
-          High: <strong>{formatUsd(maxV)}</strong>
+          Highest: <strong>{formatUsd(maxV)}</strong>
         </span>
       </div>
-      <GrowthChartScreenReaderTable
-        series={series}
-        rangeHeading={RANGE_HEADING[range]}
-        windowRangeLabel={windowRangeLabel}
-        growthInWindowCents={windowBreakdown.growthInWindowCents}
-        netFlowInWindowCents={windowBreakdown.netFlowInWindowCents}
-        basisLine={basisLine}
-      />
+      <GrowthChartScreenReaderTable series={series} />
     </section>
   )
 }
 
 function GrowthChartScreenReaderTable({
   series,
-  rangeHeading,
-  windowRangeLabel,
-  growthInWindowCents,
-  netFlowInWindowCents,
-  basisLine,
 }: {
   series: GrowthChartPoint[]
-  rangeHeading: string
-  windowRangeLabel: string
-  growthInWindowCents: number
-  netFlowInWindowCents: number
-  basisLine: string
 }) {
+  if (series.length === 0) return null
   const stride =
     series.length <= 12 ? 1 : Math.max(1, Math.floor(series.length / 12))
   const rows: GrowthChartPoint[] = []
@@ -315,12 +264,6 @@ function GrowthChartScreenReaderTable({
   if (rows[rows.length - 1]?.date !== last.date) rows.push(last)
   return (
     <div className="sr-only">
-      <p>
-        {rangeHeading}, {windowRangeLabel}. Growth from account rules in this
-        window: {formatUsdGrowthSigned(growthInWindowCents)}. Net deposits and
-        withdrawals in window: {formatUsdGrowthSigned(netFlowInWindowCents)}.
-        Based on: {basisLine}
-      </p>
       <table>
         <caption>Account value by date</caption>
         <thead>
