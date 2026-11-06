@@ -23,13 +23,17 @@ type Props = {
    */
   accountTypePicker?: 'list' | 'cards'
   /**
-   * When true, the growth type cannot change. Only month-end % rows are
-   * editable (and only when the strategy is `monthly_end_compound`).
+   * When true, the growth type cannot change. Name stays outside this editor.
+   * Savings can change its annual rate, month-end can change percents and cap,
+   * and piggy or market have no type switch.
    */
   typeLocked?: boolean
   /** With `typeLocked`, show the same per-month controls as the ledger table. */
   typeLockedLedgerMonths?: string[]
   typeLockedFirstMonthKey?: string
+  /** Ledger months so month-end rates in Edit account match the activity table. */
+  ledgerMonthsDescending?: string[]
+  firstMonthKey?: string
 }
 
 const ACCOUNT_TYPE_MODES = [
@@ -44,7 +48,10 @@ function StrategyEditorFull({
   onChange,
   showFieldsetLegend = true,
   accountTypePicker = 'list',
-}: Omit<Props, 'typeLocked'>) {
+  typeLocked = false,
+  ledgerMonthsDescending,
+  firstMonthKey,
+}: Omit<Props, 'typeLockedLedgerMonths' | 'typeLockedFirstMonthKey'>) {
   const selectMode = (m: (typeof ACCOUNT_TYPE_MODES)[number]) => {
     switch (m) {
       case 'piggy_bank':
@@ -160,16 +167,47 @@ function StrategyEditorFull({
       </fieldset>
     )
 
+  const lockedType = accountTypeForMode(strategy.mode)
+  const fixedType = (
+    <div className="strategy-type-fixed">
+      <p className="label" id="strategy-type-fixed-label">
+        Growth type
+      </p>
+      <p className="strategy-type-fixed-name">{lockedType.accountName}</p>
+      <p className="hint strategy-type-fixed-lock">
+        Set when this account was created. It cannot be changed.
+      </p>
+      <p className="muted small strategy-type-fixed-model">
+        {GROWTH_MODEL_ONE_LINE[strategy.mode]}
+      </p>
+    </div>
+  )
+
   return (
     <div
       className={
         'strategy-editor' +
-        (accountTypePicker === 'cards'
+        (accountTypePicker === 'cards' && !typeLocked
           ? ' strategy-editor--account-type-cards'
-          : '')
+          : '') +
+        (typeLocked ? ' strategy-editor-type-locked' : '')
       }
     >
-      {typePicker}
+      {typeLocked ? fixedType : typePicker}
+
+      {typeLocked && strategy.mode === 'piggy_bank' && (
+        <p className="hint">
+          Growth stays at 0%. The balance only changes when you deposit or
+          withdraw.
+        </p>
+      )}
+
+      {typeLocked && strategy.mode === 'stock_market' && (
+        <p className="hint">
+          Growth follows the market illustration. There is no fixed percent to
+          set.
+        </p>
+      )}
 
       {strategy.mode === 'stock_market' && (
         <label className="field">
@@ -215,6 +253,7 @@ function StrategyEditorFull({
 
       {strategy.mode === 'monthly_end_compound' && (
         <MonthlyRatesEditor
+          layout={firstMonthKey ? 'accountEditModal' : 'default'}
           rates={strategy.monthlyRatePercentByMonth}
           capCents={strategy.capCents}
           onChange={(monthlyRatePercentByMonth) =>
@@ -227,6 +266,8 @@ function StrategyEditorFull({
               monthEndStrategy(strategy.monthlyRatePercentByMonth, capCents),
             )
           }
+          accountModalLedgerMonthsDescending={ledgerMonthsDescending}
+          accountModalFirstMonthKey={firstMonthKey}
         />
       )}
     </div>
@@ -241,46 +282,20 @@ export function StrategyEditor({
   typeLocked = false,
   typeLockedLedgerMonths,
   typeLockedFirstMonthKey,
+  ledgerMonthsDescending,
+  firstMonthKey,
 }: Props) {
-  if (typeLocked) {
-    if (strategy.mode !== 'monthly_end_compound') return null
-    const monthEndType = accountTypeForMode('monthly_end_compound')
-
-    return (
-      <div className="strategy-editor strategy-editor-type-locked">
-        <p className="muted small strategy-type-locked-lede">
-          Growth type: {monthEndType.accountName} (
-          {monthEndType.technicalLabel}). Set a learning cap, and add or change
-          the percentage for each month-end.
-        </p>
-        <MonthlyRatesEditor
-          layout="accountEditModal"
-          rates={strategy.monthlyRatePercentByMonth}
-          capCents={strategy.capCents}
-          onChange={(monthlyRatePercentByMonth) =>
-            onChange(
-              monthEndStrategy(monthlyRatePercentByMonth, strategy.capCents),
-            )
-          }
-          onCapChange={(capCents) =>
-            onChange(
-              monthEndStrategy(strategy.monthlyRatePercentByMonth, capCents),
-            )
-          }
-          accountModalLedgerMonthsDescending={typeLockedLedgerMonths ?? []}
-          accountModalFirstMonthKey={
-            typeLockedFirstMonthKey ?? monthKeyNow()
-          }
-        />
-      </div>
-    )
-  }
   return (
     <StrategyEditorFull
       strategy={strategy}
       onChange={onChange}
       showFieldsetLegend={showFieldsetLegend}
       accountTypePicker={accountTypePicker}
+      typeLocked={typeLocked}
+      ledgerMonthsDescending={
+        ledgerMonthsDescending ?? typeLockedLedgerMonths
+      }
+      firstMonthKey={firstMonthKey ?? typeLockedFirstMonthKey}
     />
   )
 }

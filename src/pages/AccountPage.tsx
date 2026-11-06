@@ -33,9 +33,8 @@ import {
   monthEndStrategy,
   readMonthEndCapCents,
 } from '../lib/monthEndCap'
-import { accountTypeForMode } from '../lib/accountTypeCatalog'
 import { kidAvatarColorHex } from '../lib/kidAvatarColors'
-import { growthExplanation, strategySummary } from '../lib/strategyLabel'
+import { growthExplanation, growthRateLabel } from '../lib/strategyLabel'
 import { sp500UsesTeachingEstimate } from '../lib/sp500Market'
 import type {
   Account,
@@ -43,6 +42,39 @@ import type {
   InvestmentStrategy,
   LedgerEntryKind,
 } from '../types/dsa'
+
+/** One informational chip. Editing happens in Edit account, not on the chip. */
+function FactPill({
+  label,
+  value,
+  to,
+}: {
+  label: string
+  value: string
+  to?: string
+}) {
+  const content = (
+    <>
+      <span className="account-fact-pill-label">{label}</span>
+      <span className="account-fact-pill-value">{value}</span>
+    </>
+  )
+
+  if (to) {
+    return (
+      <Link
+        to={to}
+        className="account-fidelity-meta-item account-fact-pill account-fact-pill--link"
+      >
+        {content}
+      </Link>
+    )
+  }
+
+  return (
+    <div className="account-fidelity-meta-item account-fact-pill">{content}</div>
+  )
+}
 
 function formatRecordedDate(ymd: string): string {
   const parts = ymd.split('-').map(Number)
@@ -336,7 +368,6 @@ export function AccountPage() {
     updateDeposit,
     deleteDeposit,
   } = useDsa()
-  const [editingName, setEditingName] = useState(false)
   const [nameDraft, setNameDraft] = useState('')
   const [ledgerModalMode, setLedgerModalMode] = useState<'add' | 'edit'>('add')
   const [ledgerEditingId, setLedgerEditingId] = useState<string | null>(null)
@@ -416,7 +447,7 @@ export function AccountPage() {
 
   const kid = kidById.get(account.kidId)
   const metrics = getAccountGrowthMetrics(account, deposits)
-  const product = accountTypeForMode(account.strategy.mode)
+  const currentMonthKey = localDateString().slice(0, 7)
   const learningCapCents = readMonthEndCapCents(account.strategy)
   const excessCents =
     learningCapCents === undefined
@@ -433,10 +464,11 @@ export function AccountPage() {
   const showMarketEstimate =
     showMarketIllustration && sp500UsesTeachingEstimate(localDateString())
 
-  const openStrategyModal = () => {
+  const openAccountEdit = () => {
     const draft = cloneInvestmentStrategy(account.strategy)
     strategyDraftRef.current = draft
     setStrategyDraft(draft)
+    setNameDraft(account.name)
     setStrategyModalOpen(true)
   }
 
@@ -496,17 +528,18 @@ export function AccountPage() {
   }
 
   const handleStrategyDraftChange = (next: InvestmentStrategy) => {
+    if (next.mode !== account.strategy.mode) return
     strategyDraftRef.current = next
     setStrategyDraft(next)
   }
 
-  const saveStrategyFromModal = () => {
-    if (account.strategy.mode !== 'monthly_end_compound') return
-    const toSave =
-      strategyDraftRef.current ??
-      strategyDraft ??
-      null
-    if (!toSave || toSave.mode !== 'monthly_end_compound') return
+  const saveAccountEdit = (e: FormEvent) => {
+    e.preventDefault()
+    const trimmed = nameDraft.trim()
+    const toSave = strategyDraftRef.current ?? strategyDraft
+    if (!trimmed || !toSave) return
+    if (toSave.mode !== account.strategy.mode) return
+    renameAccount(accountId, trimmed)
     setStrategy(accountId, cloneInvestmentStrategy(toSave))
     strategyDialogRef.current?.close()
   }
@@ -544,63 +577,17 @@ export function AccountPage() {
             <span className="account-fidelity-product-icon" aria-hidden>
               <StrategyTypeCardIcon mode={account.strategy.mode} />
             </span>
-            <div className="account-fidelity-product-copy">
-              <span className="account-fidelity-product-type">
-                {product.accountName}
-              </span>
-              {editingName ? (
-                <form
-                  className="account-fidelity-name-form inline-form"
-                  onSubmit={(e) => {
-                    e.preventDefault()
-                    renameAccount(accountId, nameDraft)
-                    setEditingName(false)
-                  }}
-                >
-                  <input
-                    className="input account-fidelity-name-input"
-                    value={nameDraft}
-                    onChange={(e) => setNameDraft(e.target.value)}
-                    aria-label="Account name"
-                  />
-                  <button type="submit" className="btn secondary btn-compact">
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className="btn link"
-                    onClick={() => setEditingName(false)}
-                  >
-                    Cancel
-                  </button>
-                </form>
-              ) : (
-                <div className="account-fidelity-name-row">
-                  <h1 className="account-fidelity-name">{account.name}</h1>
-                  <button
-                    type="button"
-                    className="account-fidelity-name-edit"
-                    onClick={() => {
-                      setNameDraft(account.name)
-                      setEditingName(true)
-                    }}
-                    aria-label={`Edit name for ${account.name}`}
-                  >
-                    Edit name
-                  </button>
-                </div>
-              )}
+            <div className="account-fidelity-name-row">
+              <h1 className="account-fidelity-name">{account.name}</h1>
+              <button
+                type="button"
+                className="btn secondary btn-compact"
+                onClick={openAccountEdit}
+              >
+                Edit account
+              </button>
             </div>
           </div>
-          {account.strategy.mode === 'monthly_end_compound' ? (
-            <button
-              type="button"
-              className="btn secondary btn-compact account-fidelity-head-action"
-              onClick={openStrategyModal}
-            >
-              Edit cap and rates
-            </button>
-          ) : null}
         </div>
 
         <div className="account-fidelity-balance-block">
@@ -614,35 +601,32 @@ export function AccountPage() {
           />
         </div>
 
-        <dl className="account-fidelity-meta">
+        <div className="account-fidelity-meta" aria-label="Account details">
           {kid ? (
-            <div className="account-fidelity-meta-item">
-              <dt>Owner</dt>
-              <dd>
-                <Link to={`/kids/${kid.id}`}>{kid.name}</Link>
-              </dd>
-            </div>
+            <FactPill label="Owner" value={kid.name} to={`/kids/${kid.id}`} />
           ) : null}
-          <div className="account-fidelity-meta-item">
-            <dt>Growth</dt>
-            <dd>{strategySummary(account.strategy)}</dd>
-          </div>
-          {learningCapCents !== undefined ? (
-            <div className="account-fidelity-meta-item">
-              <dt>Learning cap</dt>
-              <dd>
-                {formatUsd(learningCapCents)}
-                {excessCents > 0
-                  ? ` · ${formatUsd(excessCents)} past cap`
-                  : ''}
-              </dd>
-            </div>
+          <FactPill
+            label="Growth"
+            value={growthRateLabel(account.strategy, {
+              monthKey: currentMonthKey,
+              firstMonthKey: ledgerMonthRange.firstMonthKey,
+            })}
+          />
+          {account.strategy.mode === 'monthly_end_compound' ? (
+            <FactPill
+              label="Cap"
+              value={
+                learningCapCents === undefined
+                  ? 'No cap'
+                  : formatUsd(learningCapCents)
+              }
+            />
           ) : null}
-          <div className="account-fidelity-meta-item">
-            <dt>Opened</dt>
-            <dd>{formatRecordedDate(metrics.startDate)}</dd>
-          </div>
-        </dl>
+          <FactPill
+            label="Opened"
+            value={formatRecordedDate(metrics.startDate)}
+          />
+        </div>
 
         <div
           className="account-fidelity-metrics"
@@ -794,12 +778,11 @@ export function AccountPage() {
         onClose={closeStrategyModal}
         aria-labelledby="strategy-modal-title"
       >
-        {strategyDraft &&
-          account.strategy.mode === 'monthly_end_compound' && (
-          <div className="strategy-modal-box">
+        {strategyDraft ? (
+          <form className="strategy-modal-box" onSubmit={saveAccountEdit}>
             <header className="strategy-modal-header">
               <h2 id="strategy-modal-title" className="strategy-modal-title">
-                Month-end cap and rates
+                Edit account
               </h2>
               <button
                 type="button"
@@ -811,13 +794,26 @@ export function AccountPage() {
               </button>
             </header>
             <div className="strategy-modal-body">
+              <label className="field">
+                <span className="label" id="account-name-label">
+                  Account name
+                </span>
+                <input
+                  id="account-name-input"
+                  className="input"
+                  value={nameDraft}
+                  onChange={(e) => setNameDraft(e.target.value)}
+                  aria-labelledby="account-name-label"
+                  autoFocus
+                  required
+                />
+              </label>
               <StrategyEditor
                 typeLocked
-                typeLockedLedgerMonths={ledgerMonthRange.monthsDescending}
-                typeLockedFirstMonthKey={ledgerMonthRange.firstMonthKey}
                 strategy={strategyDraft}
                 onChange={handleStrategyDraftChange}
-                showFieldsetLegend={false}
+                ledgerMonthsDescending={ledgerMonthRange.monthsDescending}
+                firstMonthKey={ledgerMonthRange.firstMonthKey}
               />
             </div>
             <footer className="strategy-modal-footer">
@@ -828,16 +824,12 @@ export function AccountPage() {
               >
                 Cancel
               </button>
-              <button
-                type="button"
-                className="btn primary"
-                onClick={saveStrategyFromModal}
-              >
+              <button type="submit" className="btn primary">
                 Save
               </button>
             </footer>
-          </div>
-        )}
+          </form>
+        ) : null}
       </dialog>
 
       <dialog

@@ -1,3 +1,4 @@
+import { effectiveMonthEndPercentForMonth } from './accountGrowth'
 import { accountTypeForMode } from './accountTypeCatalog'
 import { readMonthEndCapCents } from './monthEndCap'
 import { formatUsd } from './money'
@@ -6,6 +7,38 @@ import type { InvestmentStrategy } from '../types/dsa'
 export type StrategySummaryOptions = {
   /** When true, market index shows only the catalog name (no benchmark ticker). */
   omitBenchmark?: boolean
+}
+
+function formatGrowthPercent(n: number): string {
+  if (!Number.isFinite(n)) return '0%'
+  const rounded = Math.round(n * 100) / 100
+  return `${rounded}%`
+}
+
+/**
+ * Current growth rate for an informational pill.
+ * Month-end uses the percent that applies this month. Market has no fixed rate.
+ */
+export function growthRateLabel(
+  s: InvestmentStrategy,
+  opts: { monthKey: string; firstMonthKey: string },
+): string {
+  switch (s.mode) {
+    case 'piggy_bank':
+      return '0%'
+    case 'savings_apr':
+      return `${formatGrowthPercent(s.annualRatePercent)} a year`
+    case 'monthly_end_compound':
+      return `${formatGrowthPercent(
+        effectiveMonthEndPercentForMonth(
+          s.monthlyRatePercentByMonth,
+          opts.monthKey,
+          opts.firstMonthKey,
+        ),
+      )} this month`
+    case 'stock_market':
+      return 'Like the market'
+  }
 }
 
 /** Short line for pills, tables, and aria (uses account type catalog + key numbers). */

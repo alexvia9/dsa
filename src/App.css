@@ -2193,6 +2193,28 @@
   gap: 1rem;
 }
 
+.strategy-type-fixed {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 0.85rem;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.strategy-type-fixed-name {
+  margin: 0.15rem 0 0.2rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.strategy-type-fixed-lock {
+  margin: 0;
+}
+
+.strategy-type-fixed-model {
+  margin: 0.35rem 0 0;
+}
+
 .strategy-account-type-compact {
   display: flex;
   flex-direction: column;
@@ -3844,7 +3866,7 @@
 .account-fidelity-name-row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: 0.5rem 0.75rem;
 }
 
@@ -6202,6 +6224,98 @@
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 2px;
+}
+
+.account-page .account-fidelity-product {
+  align-items: center;
+}
+
+.account-page .account-fact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  border: none;
+  background: #fff;
+  font: inherit;
+  color: var(--fidelity-navy);
+  line-height: 1.35;
+  text-decoration: none;
+  cursor: default;
+}
+
+.account-page button.account-fact-pill {
+  cursor: pointer;
+}
+
+.account-page button.account-fact-pill:hover,
+.account-page a.account-fact-pill:hover {
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.14),
+    0 10px 18px rgba(12, 35, 64, 0.1);
+}
+
+.account-page button.account-fact-pill:focus-visible,
+.account-page a.account-fact-pill:focus-visible,
+.account-page .account-fact-edit-form input:focus-visible {
+  outline: 2px solid rgba(0, 166, 81, 0.45);
+  outline-offset: 2px;
+}
+
+.account-page .account-fact-pill-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--fidelity-muted);
+}
+
+.account-page .account-fact-pill-value {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--fidelity-navy);
+}
+
+.account-page a.account-fact-pill {
+  color: var(--fidelity-navy);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.account-page a.account-fact-pill .account-fact-pill-value {
+  color: var(--navy);
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.account-page .account-fact-pill-edit-icon {
+  flex-shrink: 0;
+  margin-left: 0.1rem;
+  color: var(--fidelity-muted);
+}
+
+.account-page button.account-fact-pill:hover .account-fact-pill-edit-icon {
+  color: var(--navy);
+}
+
+.account-page .account-fact-edit-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.28rem 0.35rem 0.28rem 0.85rem;
+  background: #fff;
+  border-radius: 1.25rem;
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.06),
+    0 8px 16px rgba(12, 35, 64, 0.06);
+}
+
+.account-page .account-fact-edit-form .input {
+  width: 10rem;
+  min-width: 8rem;
+  border-radius: 999px;
+  padding: 0.35rem 0.75rem;
 }
 
 .kid-page .kid-fidelity-holdings .add-account-cta-label,
