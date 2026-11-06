@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Link, Navigate, useNavigate, useParams } from 'react-router-dom'
+import { Link, Navigate, useParams } from 'react-router-dom'
 import { AddAccountFlow } from '../components/AddAccountFlow'
 import { AddChildFlow } from '../components/AddChildFlow'
 import { AccountGrowthTrend } from '../components/AccountGrowthTrend'
@@ -18,14 +18,15 @@ import { getAccountGrowthMetrics } from '../lib/accountGrowth'
 import { localDateString } from '../lib/dateLocal'
 import { formatUsd, parseUsdToCents } from '../lib/money'
 import { strategySummary } from '../lib/strategyLabel'
-import { confirmCloseChild } from '../lib/confirmCloseChild'
 import { homeAppPath, showFamilyOverview } from '../lib/familyRouting'
-import type { KidAvatarColorId } from '../lib/kidAvatarColors'
+import {
+  kidAvatarColorHex,
+  type KidAvatarColorId,
+} from '../lib/kidAvatarColors'
 import type { LedgerEntryKind } from '../types/dsa'
 
 export function KidPage() {
   const { kidId } = useParams<{ kidId: string }>()
-  const navigate = useNavigate()
   const {
     state,
     kidById,
@@ -33,7 +34,6 @@ export function KidPage() {
     renameKid,
     setKidAvatarColor,
     deposit,
-    closeKid,
   } = useDsa()
   const [editingName, setEditingName] = useState(false)
   const [nameDraft, setNameDraft] = useState('')
@@ -150,7 +150,14 @@ export function KidPage() {
   }
 
   return (
-    <div className="page kid-page">
+    <div
+      className="page kid-page profile-colored"
+      style={
+        {
+          '--profile-color': kidAvatarColorHex(kid.avatarColor),
+        } as React.CSSProperties
+      }
+    >
       <nav
         className="breadcrumb account-fidelity-breadcrumb"
         aria-label="Breadcrumb"
@@ -547,86 +554,19 @@ export function KidPage() {
       </section>
 
       {state.kids.length === 1 ? (
-        <div className="kid-family-actions">
-          <section className="account-fidelity-panel kid-family-action-card">
-            <h2 className="account-fidelity-panel-title">Add another child</h2>
-            <p className="muted small kid-family-action-lede">
-              Unlock the family overview — everyone&apos;s balances on one
-              screen.
-            </p>
-            <AddChildFlow
-              variant="standalone"
-              navigateTo="family"
-              ctaLabel="Add another child"
-            />
-          </section>
-          <section className="account-fidelity-panel kid-family-action-card">
-            <h2 className="account-fidelity-panel-title">Remove child</h2>
-            <p className="muted small kid-family-action-lede">
-              Remove <strong>{kid.name}</strong> and all{' '}
-              {accounts.length === 1
-                ? 'their account'
-                : `${accounts.length} accounts`}
-              {accounts.length === 0 ? ' (none yet)' : ''} from your family.
-            </p>
-            <button
-              type="button"
-              className="btn secondary kid-family-action-btn account-close-btn"
-              onClick={() => {
-                if (
-                  !confirmCloseChild(
-                    kid,
-                    accounts.length,
-                    kidPortfolioMetrics.totalValueCents,
-                  )
-                ) {
-                  return
-                }
-                const nextHome = homeAppPath(
-                  state.kids.filter((k) => k.id !== kidId),
-                )
-                closeKid(kidId)
-                navigate(nextHome)
-              }}
-            >
-              Remove {kid.name}
-            </button>
-          </section>
-        </div>
-      ) : (
         <section className="account-fidelity-panel kid-family-action-card">
-          <h2 className="account-fidelity-panel-title">Remove child</h2>
+          <h2 className="account-fidelity-panel-title">Add another child</h2>
           <p className="muted small kid-family-action-lede">
-            Remove <strong>{kid.name}</strong> and all{' '}
-            {accounts.length === 1
-              ? 'their account'
-              : `${accounts.length} accounts`}
-            {accounts.length === 0 ? ' (none yet)' : ''} from your family.
+            Unlock the family overview — everyone&apos;s balances on one
+            screen.
           </p>
-          <button
-            type="button"
-            className="btn secondary kid-family-action-btn account-close-btn"
-            onClick={() => {
-              if (
-                !confirmCloseChild(
-                  kid,
-                  accounts.length,
-                  kidPortfolioMetrics.totalValueCents,
-                )
-              ) {
-                return
-              }
-              const nextHome = homeAppPath(
-                state.kids.filter((k) => k.id !== kidId),
-              )
-              closeKid(kidId)
-              navigate(nextHome)
-            }}
-          >
-            Remove {kid.name}
-          </button>
+          <AddChildFlow
+            variant="standalone"
+            navigateTo="family"
+            ctaLabel="Add another child"
+          />
         </section>
-      )}
+      ) : null}
     </div>
   )
 }

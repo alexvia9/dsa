@@ -9,6 +9,7 @@ import { AccountPage } from './pages/AccountPage'
 import { FamilyHomeRoute } from './pages/FamilyHomeRoute'
 import { KidPage } from './pages/KidPage'
 import { LandingPage } from './pages/LandingPage'
+import { UserAccountPage } from './pages/UserAccountPage'
 import './App.css'
 
 function DsaBootGate({ children }: { children: ReactNode }) {
@@ -93,6 +94,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route element={<ProtectedShell />}>
+        <Route path="/account" element={<UserAccountPage />} />
         <Route path="/family" element={<FamilyHomeRoute />} />
         <Route path="/kids/:kidId" element={<KidPage />} />
         <Route path="/accounts/:accountId" element={<AccountPage />} />

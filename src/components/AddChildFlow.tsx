@@ -19,8 +19,8 @@ import { KidAvatar } from './KidAvatar'
 type Props = {
   /** Grid tile (family dashboard) or inline block (setup / kid page). */
   variant?: 'tile' | 'standalone'
-  /** Where to go after a successful add. */
-  navigateTo?: 'new-kid' | 'family'
+  /** Where to go after a successful add. `stay` keeps the current page. */
+  navigateTo?: 'new-kid' | 'family' | 'stay'
   ctaLabel?: string
 }
 
@@ -74,6 +74,7 @@ export function AddChildFlow({
     const id = addKid(name, avatarColor)
     if (!id) return
     closeModal()
+    if (navigateTo === 'stay') return
     if (navigateTo === 'family') {
       navigate('/family')
     } else {

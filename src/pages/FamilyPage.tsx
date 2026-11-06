@@ -1,15 +1,12 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { AddChildFlow } from '../components/AddChildFlow'
 import { KidAvatar } from '../components/KidAvatar'
 import { StrategyTypeCardIcon } from '../components/icons/StrategyTypeIcons'
 import { useDsa } from '../context/DsaContext'
-import { confirmCloseChild } from '../lib/confirmCloseChild'
-import { homeAppPath } from '../lib/familyRouting'
 import { formatUsd } from '../lib/money'
 
 export function FamilyPage() {
-  const navigate = useNavigate()
-  const { state, familyTotalCents, closeKid } = useDsa()
+  const { state, familyTotalCents } = useDsa()
 
   return (
     <div className="page family-page">
@@ -90,25 +87,6 @@ export function FamilyPage() {
                       ))}
                     </ul>
                   ) : null}
-
-                  <button
-                    type="button"
-                    className="kid-card-remove-btn"
-                    onClick={() => {
-                      if (
-                        !confirmCloseChild(kid, accounts.length, total)
-                      ) {
-                        return
-                      }
-                      const nextHome = homeAppPath(
-                        state.kids.filter((k) => k.id !== kid.id),
-                      )
-                      closeKid(kid.id)
-                      navigate(nextHome)
-                    }}
-                  >
-                    Remove {kid.name}
-                  </button>
                 </article>
               </li>
             )

@@ -11,6 +11,8 @@
     "update-sp500": "node scripts/fetch-sp500-daily.mjs"
   },
   "dependencies": {
+    "@fontsource/nunito": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.1",
     "@supabase/supabase-js": "^2.105.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

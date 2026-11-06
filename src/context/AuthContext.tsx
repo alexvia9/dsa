@@ -26,6 +26,13 @@ type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  updateEmail: (
+    email: string,
+  ) => Promise<{ error: Error | null; pendingEmail: string | null }>
+  updatePassword: (
+    currentPassword: string,
+    newPassword: string,
+  ) => Promise<{ error: Error | null }>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -126,6 +133,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [],
   )
 
+  const updateEmail = useMemo(
+    () => async (email: string) => {
+      const supabase = getSupabase()
+      if (!supabase) {
+        return {
+          error: new Error('Supabase is not configured'),
+          pendingEmail: null,
+        }
+      }
+      const { data, error } = await supabase.auth.updateUser({
+        email: email.trim(),
+      })
+      return {
+        error: error ? new Error(error.message) : null,
+        pendingEmail: data?.user?.new_email ?? null,
+      }
+    },
+    [],
+  )
+
+  const updatePassword = useMemo(
+    () => async (currentPassword: string, newPassword: string) => {
+      const supabase = getSupabase()
+      if (!supabase) {
+        return { error: new Error('Supabase is not configured') }
+      }
+      const email = session?.user.email
+      if (!email) {
+        return { error: new Error('This account has no email address.') }
+      }
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email,
+        password: currentPassword,
+      })
+      if (reauthError) {
+        return { error: new Error('Current password is incorrect.') }
+      }
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+      return { error: error ? new Error(error.message) : null }
+    },
+    [session?.user.email],
+  )
+
   const value = useMemo(
     () => ({
       session,
@@ -138,6 +190,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
+      updateEmail,
+      updatePassword,
     }),
     [
       session,
@@ -150,6 +204,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signUp,
       signOut,
+      updateEmail,
+      updatePassword,
     ],
   )
 

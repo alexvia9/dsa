@@ -31,6 +31,7 @@ import {
   readMonthEndCapCents,
 } from '../lib/monthEndCap'
 import { accountTypeForMode } from '../lib/accountTypeCatalog'
+import { kidAvatarColorHex } from '../lib/kidAvatarColors'
 import { growthExplanation, strategySummary } from '../lib/strategyLabel'
 import type {
   Account,
@@ -504,7 +505,16 @@ export function AccountPage() {
   }
 
   return (
-    <div className="page account-page">
+    <div
+      className={`page account-page${kid ? ' profile-colored' : ''}`}
+      style={
+        kid
+          ? ({
+              '--profile-color': kidAvatarColorHex(kid.avatarColor),
+            } as React.CSSProperties)
+          : undefined
+      }
+    >
       <nav className="breadcrumb account-fidelity-breadcrumb" aria-label="Breadcrumb">
         <FamilyBreadcrumb />
         {kid ? (

@@ -340,8 +340,8 @@
 
 @media (max-width: 640px) {
   :is(.kid-page, .account-page) .account-fidelity-breadcrumb {
-    margin-left: -1.5rem;
-    margin-right: -1.5rem;
+    margin-left: 0;
+    margin-right: 0;
   }
 }
 
@@ -6525,5 +6525,657 @@
   background: var(--navy);
   color: #fff;
   border: none;
+}
+
+/* Profile color on kid total value and account value. */
+.profile-colored.kid-page .account-fidelity-balance-block,
+.profile-colored.account-page .account-fidelity-balance-block {
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--profile-color) 78%, #000) 0%,
+    color-mix(in srgb, var(--profile-color) 52%, #000) 100%
+  );
+  box-shadow:
+    0 4px 0 color-mix(in srgb, var(--profile-color) 40%, #000),
+    0 10px 16px color-mix(in srgb, var(--profile-color) 32%, transparent);
+  color: #fff;
+}
+
+.profile-colored.kid-page .account-fidelity-balance,
+.profile-colored.kid-page .account-fidelity-change,
+.profile-colored.kid-page .account-fidelity-change-value,
+.profile-colored.account-page .account-fidelity-summary .account-fidelity-balance,
+.profile-colored.account-page .account-fidelity-summary .account-fidelity-change,
+.profile-colored.account-page .account-fidelity-summary .account-fidelity-change-value {
+  color: #fff;
+}
+
+.profile-colored.kid-page .account-fidelity-balance-label,
+.profile-colored.kid-page .account-fidelity-change-label,
+.profile-colored.account-page .account-fidelity-summary .account-fidelity-balance-label,
+.profile-colored.account-page .account-fidelity-summary .account-fidelity-change-label {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* Deposit / Withdraw as a two-tab control inside ledger modals. */
+.ledger-modal-type-fieldset {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem;
+  margin: 0.1rem 0 0.85rem;
+  padding: 0.28rem;
+  border-radius: 999px;
+  background: #efe8de;
+}
+
+.ledger-modal-type-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.ledger-modal-type-row input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.ledger-modal-type-row:has(input:checked) {
+  background: var(--navy);
+  color: #fff;
+  box-shadow: 0 3px 0 rgba(7, 24, 44, 0.28);
+}
+
+.ledger-modal-type-row:has(input:focus-visible) {
+  outline: 2px solid rgba(0, 166, 81, 0.5);
+  outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .site-header,
+  .app-shell .site-header,
+  .landing-page .site-header {
+    flex-wrap: wrap;
+    align-items: center;
+    row-gap: 0.45rem;
+    column-gap: 0.6rem;
+    padding: 0.55rem 0.8rem 0.65rem;
+    padding-top: max(0.55rem, env(safe-area-inset-top));
+    padding-left: max(0.8rem, env(safe-area-inset-left));
+    padding-right: max(0.8rem, env(safe-area-inset-right));
+  }
+
+  .brand,
+  .brand-link {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 0.4rem;
+  }
+
+  .brand-mark {
+    width: 2.05rem;
+    height: 2.05rem;
+  }
+
+  .brand-monogram {
+    display: none;
+  }
+
+  .brand-tagline {
+    display: none;
+  }
+
+  .brand-title {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .site-nav {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .site-header .nav-context,
+  .app-shell .site-header .nav-context {
+    display: none;
+  }
+
+  .nav-link,
+  .app-shell .nav-link {
+    padding: 0.32rem 0.7rem;
+    font-size: 0.82rem;
+  }
+
+  .site-main {
+    padding: 0.85rem 0.8rem 1.35rem;
+    padding-left: max(0.8rem, env(safe-area-inset-left));
+    padding-right: max(0.8rem, env(safe-area-inset-right));
+  }
+
+  .page-header {
+    margin-bottom: 0.85rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.65rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .lede {
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .family-balance-card.card.highlight {
+    padding: 1.1rem 1.05rem 1.15rem;
+    border-radius: 1.4rem;
+  }
+
+  .family-balance-card .big-number {
+    font-size: clamp(2.35rem, 11vw, 3rem);
+  }
+
+  .card {
+    padding: 1rem 0.95rem;
+  }
+
+  .kid-card-link {
+    padding: 0.9rem 0.9rem 0.55rem;
+  }
+
+  .kid-card-accounts {
+    padding: 0.1rem 0.7rem 0.85rem;
+  }
+
+  :is(.kid-page, .account-page) {
+    --fidelity-stack: 0.7rem;
+    gap: 0.7rem;
+    padding-bottom: 1.1rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-breadcrumb {
+    margin: 0 0 0.45rem;
+    padding: 0.05rem 0.05rem 0.15rem;
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-summary-head,
+  .kid-fidelity-summary-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .kid-fidelity-identity,
+  .account-fidelity-product {
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .kid-page .kid-fidelity-avatar {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .account-fidelity-product-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-name {
+    font-size: 1.4rem;
+  }
+
+  .account-fidelity-name-row {
+    align-items: center;
+    gap: 0.35rem 0.45rem;
+  }
+
+  .account-fidelity-head-action {
+    align-self: flex-start;
+  }
+
+  .kid-fidelity-quick-actions,
+  .deposit-section-actions,
+  .account-fidelity-activity-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    gap: 0.45rem;
+  }
+
+  .kid-fidelity-quick-actions .btn,
+  .deposit-section-actions .btn,
+  .account-fidelity-activity-actions .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.85rem;
+    padding: 0.7rem 0.75rem;
+    font-size: 1.02rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-panel-head,
+  .deposit-section-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.65rem;
+    margin-bottom: 0.2rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-balance-block {
+    margin-top: 0.1rem;
+    padding: 1rem 1rem 0.9rem;
+    border-radius: 1.4rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-balance {
+    font-size: clamp(2.3rem, 11vw, 2.9rem);
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-balance-label {
+    margin-bottom: 0.1rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-meta {
+    margin-bottom: 0.7rem;
+    gap: 0.4rem;
+  }
+
+  :is(.kid-page, .account-page) .account-fidelity-panel {
+    padding: 0.9rem 0.85rem 0.95rem;
+    border-radius: 1.35rem;
+  }
+
+  .kid-page .kid-fidelity-holding-row,
+  .kid-page .kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-row,
+  .kid-page .kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-row,
+  .kid-page .kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-row,
+  .kid-page .kid-fidelity-holding-item--stock_market .kid-fidelity-holding-row {
+    padding: 0.75rem 0.8rem;
+    gap: 0.05rem 0.6rem;
+    border-radius: 1.2rem;
+  }
+
+  .kid-page .kid-fidelity-holding-icon {
+    width: 2.45rem;
+    height: 2.45rem;
+  }
+
+  .kid-page .kid-fidelity-holding-type {
+    padding-left: 3.1rem;
+  }
+
+  .kid-page .kid-fidelity-holding-balance {
+    font-size: 1.15rem;
+  }
+
+  .strategy-rule-modal {
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
+    margin: auto;
+    border-radius: 1.25rem;
+    box-shadow: 0 16px 36px rgba(12, 35, 64, 0.28);
+  }
+
+  .strategy-modal-box {
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .strategy-modal-header {
+    padding: 0.8rem 0.85rem 0.15rem;
+    gap: 0.45rem;
+  }
+
+  .strategy-modal-title {
+    font-size: 1.2rem;
+  }
+
+  .strategy-modal-body,
+  .strategy-modal-body.deposit-add-modal-body {
+    padding: 0.45rem 0.85rem 0.75rem;
+  }
+
+  .strategy-modal-footer {
+    display: flex;
+    gap: 0.45rem;
+    padding: 0.65rem 0.85rem 0.85rem;
+  }
+
+  .strategy-modal-footer > .btn,
+  .strategy-modal-footer-actions {
+    flex: 1 1 0;
+  }
+
+  .strategy-modal-footer-actions {
+    display: flex;
+    gap: 0.45rem;
+  }
+
+  .strategy-modal-footer .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.75rem;
+    padding-inline: 0.7rem;
+  }
+
+  .deposit-add-modal-lede {
+    margin-bottom: 0.65rem;
+  }
+
+  .deposit-add-modal-fields {
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  .deposit-add-modal-field-date,
+  .deposit-add-modal-field-amount {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+
+  .ledger-modal-account-field,
+  .ledger-modal-note-field {
+    margin-bottom: 0.7rem;
+  }
+
+  .ledger-modal-type-fieldset {
+    margin: 0.15rem 0 0.9rem;
+    padding: 0.3rem;
+  }
+
+  .ledger-modal-type-row {
+    min-height: 3rem;
+    font-size: 1.05rem;
+  }
+
+  .kid-profile-edit-panel {
+    padding: 0.95rem 0.9rem;
+    gap: 0.9rem;
+  }
+
+  .kid-profile-edit-identity {
+    gap: 0.75rem;
+  }
+}
+
+/* --- Your account --------------------------------------------------------- */
+
+.user-account-page {
+  max-width: 40rem;
+}
+
+.user-account-section .hint {
+  margin-bottom: 0.85rem;
+}
+
+.user-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 24rem;
+}
+
+.user-account-form .input {
+  width: 100%;
+  min-width: 0;
+}
+
+.user-account-form .btn.primary {
+  align-self: flex-start;
+}
+
+.user-account-kids {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.user-account-kid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 1.1rem;
+  background: var(--bg);
+}
+
+.user-account-kid-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+}
+
+.user-account-kid-link:hover .user-account-kid-name {
+  text-decoration: underline;
+}
+
+.user-account-kid-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-account-kid-name {
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.user-account-kid-meta {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.user-account-remove {
+  flex-shrink: 0;
+}
+
+.user-account-empty {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
+
+.user-account-section .add-child-standalone-cta {
+  margin-top: 0.15rem;
+}
+
+@media (max-width: 640px) {
+  .account-page .deposit-month-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem 0.45rem;
+    padding: 0.7rem 0.75rem;
+  }
+
+  .account-page .deposit-month-metric-label {
+    font-size: 0.72rem;
+  }
+
+  .account-page .deposit-month-metric-value {
+    font-size: 0.95rem;
+  }
+}
+
+/* App-shell destination pills. Landing header is unchanged.
+   Account stays in the header. Family and children sit on the row below. */
+
+.app-shell .app-chrome {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(246, 243, 238, 0.92);
+  backdrop-filter: blur(12px);
+}
+
+.app-shell .site-header {
+  position: static;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+  background: transparent;
+  box-shadow: none;
+  border-bottom: 1px solid rgba(12, 35, 64, 0.08);
+  padding-bottom: 0.7rem;
+}
+
+.app-shell .site-header .brand {
+  min-width: 0;
+}
+
+.app-shell .site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.app-shell .app-family-nav {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: safe center;
+  gap: 0.45rem;
+  min-width: 0;
+  width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.7rem 1.5rem 0.75rem;
+  scroll-padding-inline: 4px;
+}
+
+.app-shell .app-family-nav::-webkit-scrollbar {
+  display: none;
+  height: 0;
+}
+
+.app-shell .site-nav-auth {
+  margin-left: 0;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.app-shell .nav-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  min-height: 2.5rem;
+  padding: 0.3rem 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.app-shell .nav-pill--kid {
+  padding-left: 0.28rem;
+  padding-right: 0.85rem;
+}
+
+.app-shell .nav-pill-avatar.kid-card-avatar {
+  width: 1.65rem;
+  height: 1.65rem;
+  font-size: 0.72rem;
+}
+
+.app-shell .nav-link:focus-visible,
+.app-shell .brand-link:focus-visible,
+.app-shell .site-header .btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .app-shell .site-header {
+    column-gap: 0.5rem;
+    row-gap: 0.4rem;
+    padding: 0.5rem 0.75rem 0.35rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+
+  .app-shell .app-family-nav {
+    flex-wrap: nowrap;
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+    padding-bottom: 0.6rem;
+  }
+
+  .app-shell .brand-link {
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .app-shell .brand-text {
+    min-width: 0;
+  }
+
+  .app-shell .brand-tagline {
+    display: none;
+  }
+
+  .app-shell .brand-mark {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .app-shell .brand-monogram {
+    display: inline;
+    font-size: 1.05rem;
+  }
+
+  .app-shell .brand-title {
+    font-size: 0.84rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .app-shell .app-family-nav {
+    justify-content: safe center;
+  }
+
+  .app-shell .nav-pill {
+    min-height: 2.75rem;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.9rem;
+  }
+
+  .app-shell .nav-pill--kid {
+    padding-left: 0.32rem;
+  }
+
+  .app-shell .site-nav-auth {
+    min-height: 2.5rem;
+  }
 }
 
