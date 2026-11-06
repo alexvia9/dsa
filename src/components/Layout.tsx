@@ -30,7 +30,7 @@ export function Layout() {
             <DsaMonogram className="brand-monogram" />
             <span className="brand-text">
               <span className="brand-title">Dad Savings Account</span>
-              <span className="brand-tagline">Family brokerage</span>
+              <span className="brand-tagline">Kids&apos; money, one place</span>
             </span>
           </Link>
         </div>

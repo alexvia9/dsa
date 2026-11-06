@@ -1,5 +1,5 @@
 :root {
-  font-family: 'DM Sans', system-ui, 'Segoe UI', Roboto, Ubuntu, sans-serif;
+  font-family: 'Nunito', system-ui, 'Segoe UI', Roboto, Ubuntu, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -9,11 +9,11 @@
   --navy: #0c2340;
   --navy-mid: #163556;
 
-  --bg: #f4f6f9;
+  --bg: #f6f3ee;
   --surface: #ffffff;
-  --text: #152238;
-  --muted: #5c6778;
-  --border: #dde3eb;
+  --text: #1c2430;
+  --muted: #6b6258;
+  --border: #efe6da;
 
   --accent: #00a651;
   --accent-2: #008542;

@@ -153,30 +153,30 @@
 /* Kid + account views — shared portfolio shell */
 .app-shell:has(.kid-page),
 .app-shell:has(.account-page) {
-  background: #eceef2;
+  background: var(--bg);
 }
 
 .site-main:has(.kid-page),
 .site-main:has(.account-page) {
   max-width: none;
   width: 100%;
-  background: #eceef2;
+  background: transparent;
 }
 
 :is(.kid-page, .account-page) {
-  --fidelity-page-bg: #eceef2;
+  --fidelity-page-bg: transparent;
   max-width: 72rem;
   margin-left: auto;
   margin-right: auto;
   width: 100%;
   --fidelity-navy: #0a2540;
-  --fidelity-border: #d4dae3;
-  --fidelity-muted: #5a6578;
-  --fidelity-inset: #f7f8fa;
+  --fidelity-border: rgba(12, 35, 64, 0.08);
+  --fidelity-muted: #6b6258;
+  --fidelity-inset: #fffdf9;
   --fidelity-stack: 1rem;
   --fidelity-pad-block: 1.25rem;
   --fidelity-pad-inline: 1.5rem;
-  --fidelity-radius: 0.5rem;
+  --fidelity-radius: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: var(--fidelity-stack);
@@ -184,10 +184,10 @@
 }
 
 :is(.kid-page, .account-page) .account-fidelity-breadcrumb {
-  margin: -1.5rem -1.5rem 0;
-  padding: 0.65rem 1.5rem;
-  background: var(--fidelity-page-bg);
-  border-bottom: 1px solid var(--fidelity-border);
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border-bottom: none;
   font-size: 0.8125rem;
 }
 
@@ -213,9 +213,9 @@
   margin-bottom: 0;
   padding: var(--fidelity-pad-block) var(--fidelity-pad-inline);
   background: var(--surface);
-  border: 1px solid var(--fidelity-border);
+  border: none;
   border-radius: var(--fidelity-radius);
-  box-shadow: none;
+  box-shadow: 0 10px 28px rgba(12, 35, 64, 0.05);
 }
 
 :is(.kid-page, .account-page) .account-fidelity-panels {
@@ -278,7 +278,7 @@
   :is(.kid-fidelity-holdings-header, .account-fidelity-ledger-header) {
   margin-bottom: 0.5rem;
   padding: 0 0 0.5rem;
-  border-bottom: 1px solid var(--fidelity-border);
+  border-bottom: none;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -286,10 +286,14 @@
   color: var(--fidelity-muted);
 }
 
+.kid-page .kid-fidelity-holdings-header {
+  display: none;
+}
+
 :is(.kid-page, .account-page) .account-fidelity-summary-head {
   margin-bottom: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--fidelity-border);
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 :is(.kid-page, .account-page) .account-fidelity-balance-block {
@@ -1046,7 +1050,7 @@
 }
 
 .page-header h1 {
-  font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  font-family: 'Nunito', system-ui, sans-serif;
   font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1102,11 +1106,11 @@
 
 .card {
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border: none;
+  border-radius: 1.5rem;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1rem;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 10px 28px rgba(12, 35, 64, 0.05);
 }
 
 .card.highlight {
@@ -1146,7 +1150,7 @@
 .input {
   font: inherit;
   padding: 0.5rem 0.75rem;
-  border-radius: 0.5rem;
+  border-radius: 0.95rem;
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
@@ -1171,9 +1175,10 @@
 .btn {
   font: inherit;
   cursor: pointer;
-  border-radius: 0.5rem;
-  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  padding: 0.55rem 1.05rem;
   border: 1px solid transparent;
+  font-weight: 800;
 }
 
 .btn.primary {
@@ -1926,17 +1931,17 @@
 }
 
 .kid-card-remove-btn {
-  display: block;
-  width: 100%;
-  margin: 0.65rem 0 0;
-  padding: 0.45rem 0.75rem;
+  display: inline-flex;
+  width: auto;
+  margin: 0.35rem 0 0;
+  padding: 0.25rem 0.15rem;
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--muted);
   background: transparent;
   border: none;
-  border-top: 1px solid var(--border);
+  border-radius: 999px;
   cursor: pointer;
   text-align: left;
   transition:
@@ -3981,6 +3986,47 @@
   color: var(--fidelity-muted);
 }
 
+.month-end-cap-choice {
+  border: 2px solid #ea580c;
+}
+
+.month-end-cap-fields {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.month-end-cap-destination {
+  margin: 0;
+}
+
+.month-end-cap-destination .input,
+.month-end-cap-field .input {
+  width: 100%;
+  max-width: 16rem;
+  box-sizing: border-box;
+}
+
+.month-end-cap-error {
+  color: #b91c1c;
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+}
+
+.month-end-cap-actions {
+  margin-top: 1rem;
+}
+
+.month-end-cap-field {
+  margin-bottom: 0.85rem;
+}
+
+@media (min-width: 40rem) {
+  .month-end-cap-fields--split {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 .account-page .account-growth-chart-card.card {
   margin-bottom: 0;
 }
@@ -5084,7 +5130,23 @@
 
 .landing-type-card .strategy-type-card-top {
   position: relative;
-  padding-right: 3.5rem;
+}
+
+.account-types-group + .account-types-group {
+  margin-top: 1.75rem;
+}
+
+.account-types-group-title {
+  margin: 0 0 0.3rem;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.account-types-group-lede {
+  margin: 0 0 0.85rem;
+  max-width: 40rem;
 }
 
 .landing-product-tag {
@@ -5229,5 +5291,1239 @@
 .auth-modal .login-message {
   margin: 0;
   line-height: 1.4;
+}
+
+/* Playful app skin — light canvas, chunky type, account-type color on tiles. */
+
+.app-shell .site-header {
+  background: rgba(246, 243, 238, 0.92);
+  color: var(--navy);
+  border-bottom: none;
+  padding-top: 1.15rem;
+  backdrop-filter: blur(12px);
+}
+
+.app-shell .brand-monogram,
+.app-shell .brand-title {
+  color: var(--navy);
+}
+
+.app-shell .brand-tagline,
+.app-shell .site-header .nav-context {
+  color: var(--muted);
+}
+
+.app-shell .nav-link {
+  color: var(--navy);
+  border-radius: 999px;
+  background: transparent;
+}
+
+.app-shell .nav-link:hover,
+.app-shell .nav-link.active {
+  color: #fff;
+  background: var(--navy);
+  border-color: transparent;
+}
+
+.app-shell .site-header .btn.secondary {
+  background: #fff;
+  color: var(--navy);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(12, 35, 64, 0.06);
+}
+
+.app-shell .site-header .btn.secondary:hover {
+  background: #fff;
+  border-color: transparent;
+}
+
+.family-balance-card.card.highlight {
+  background: var(--navy);
+  border: none;
+  border-radius: 1.75rem;
+  padding: 1.35rem 1.45rem 1.5rem;
+  box-shadow: 0 18px 36px rgba(12, 35, 64, 0.16);
+}
+
+.family-balance-card .card-title,
+.family-balance-card .family-balance-meta {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.family-balance-card .big-number {
+  color: #fff;
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 6vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+
+.kid-card {
+  border-radius: 1.6rem;
+  box-shadow: 0 12px 28px rgba(12, 35, 64, 0.06);
+}
+
+.kid-card-avatar {
+  width: 3.15rem;
+  height: 3.15rem;
+  font-size: 1.2rem;
+}
+
+.kid-card-name,
+.kid-card-balance,
+.account-fidelity-name,
+.account-fidelity-balance,
+.account-fidelity-panel-title,
+.page-header h1 {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.kid-card-account {
+  border-radius: 1rem;
+  padding: 0.55rem 0.7rem;
+}
+
+.kid-card-account-icon {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.7rem;
+  color: #fff;
+}
+
+.kid-card-account--piggy_bank {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.kid-card-account--piggy_bank .kid-card-account-icon {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.kid-card-account--savings_apr {
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.kid-card-account--savings_apr .kid-card-account-icon {
+  background: #16a34a;
+  color: #fff;
+}
+
+.kid-card-account--monthly_end_compound {
+  background: rgba(234, 88, 12, 0.12);
+}
+
+.kid-card-account--monthly_end_compound .kid-card-account-icon {
+  background: #ea580c;
+  color: #fff;
+}
+
+.kid-card-account--stock_market {
+  background: rgba(202, 138, 4, 0.14);
+}
+
+.kid-card-account--stock_market .kid-card-account-icon {
+  background: #ca8a04;
+  color: #fff;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-block {
+  margin-top: 0.85rem;
+  padding: 1.15rem 1.25rem 1.2rem;
+  border-radius: 1.45rem;
+  background: var(--navy);
+  color: #fff;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-label,
+:is(.kid-page, .account-page) .account-fidelity-balance,
+:is(.kid-page, .account-page) .account-fidelity-change,
+:is(.kid-page, .account-page) .account-fidelity-change-label,
+:is(.kid-page, .account-page) .account-fidelity-change-value {
+  color: #fff;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-label,
+:is(.kid-page, .account-page) .account-fidelity-change-label {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance {
+  font-size: clamp(2.4rem, 6vw, 3.3rem);
+  font-weight: 800;
+}
+
+.account-page .account-fidelity-summary--piggy_bank .account-fidelity-balance-block {
+  background: #7c3aed;
+}
+
+.account-page .account-fidelity-summary--savings_apr .account-fidelity-balance-block {
+  background: #16a34a;
+}
+
+.account-page .account-fidelity-summary--monthly_end_compound .account-fidelity-balance-block {
+  background: #ea580c;
+}
+
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance-block {
+  background: #ca8a04;
+}
+
+.account-fidelity-product-icon {
+  border: none;
+  border-radius: 0.9rem;
+  color: #fff;
+}
+
+.account-fidelity-product--piggy_bank .account-fidelity-product-icon {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.account-fidelity-product--savings_apr .account-fidelity-product-icon {
+  background: #16a34a;
+  color: #fff;
+}
+
+.account-fidelity-product--monthly_end_compound .account-fidelity-product-icon {
+  background: #ea580c;
+  color: #fff;
+}
+
+.account-fidelity-product--stock_market .account-fidelity-product-icon {
+  background: #ca8a04;
+  color: #fff;
+}
+
+.kid-fidelity-holding-item {
+  border-bottom: none;
+  margin: 0.45rem 0;
+}
+
+.kid-page .kid-fidelity-holding-row {
+  border-radius: 1.15rem;
+  padding: 0.8rem 0.85rem;
+  background: #fffdf9;
+}
+
+.kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-row {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-row {
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-row {
+  background: rgba(234, 88, 12, 0.12);
+}
+
+.kid-fidelity-holding-item--stock_market .kid-fidelity-holding-row {
+  background: rgba(202, 138, 4, 0.14);
+}
+
+.kid-fidelity-holding-icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 0.8rem;
+  color: #fff;
+}
+
+.kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-icon {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-icon {
+  background: #16a34a;
+  color: #fff;
+}
+
+.kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-icon {
+  background: #ea580c;
+  color: #fff;
+}
+
+.kid-fidelity-holding-item--stock_market .kid-fidelity-holding-icon {
+  background: #ca8a04;
+  color: #fff;
+}
+
+.kid-page .kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon {
+  background: #7c3aed;
+  color: #fff;
+}
+
+.kid-page .kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon {
+  background: #16a34a;
+  color: #fff;
+}
+
+.kid-page .kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon {
+  background: #ea580c;
+  color: #fff;
+}
+
+.kid-page .kid-fidelity-holding-item--stock_market .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon {
+  background: #ca8a04;
+  color: #fff;
+}
+
+.kid-card-account-icon svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metrics {
+  gap: 0.65rem;
+  overflow: visible;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric {
+  background: #fff6ee;
+  border-radius: 1.1rem;
+  padding: 0.85rem 0.95rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric + .account-fidelity-metric {
+  border-left: none;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric-value {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.account-fidelity-range-toggle {
+  border: none;
+  border-radius: 999px;
+  padding: 0.2rem;
+  gap: 0.15rem;
+  background: #fff6ee;
+  overflow: visible;
+}
+
+.account-fidelity-range-btn {
+  border-right: none;
+  border-radius: 999px;
+  font-weight: 800;
+  padding: 0.35rem 0.75rem;
+}
+
+.account-fidelity-range-btn.is-active {
+  color: #fff;
+  background: var(--navy);
+  box-shadow: none;
+}
+
+.account-page .deposit-list-item {
+  border: none;
+  border-radius: 1.1rem;
+  background: #fff6ee;
+}
+
+.kid-card-account--piggy_bank .kid-card-account-icon,
+.account-fidelity-product--piggy_bank .account-fidelity-product-icon,
+.kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-icon,
+.kid-page .kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon,
+.account-page .account-fidelity-summary--piggy_bank .account-fidelity-balance-block {
+  background: #7c3aed;
+}
+
+.kid-card-account--savings_apr .kid-card-account-icon,
+.account-fidelity-product--savings_apr .account-fidelity-product-icon,
+.kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-icon,
+.kid-page .kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon,
+.account-page .account-fidelity-summary--savings_apr .account-fidelity-balance-block {
+  background: #16a34a;
+}
+
+.kid-card-account--monthly_end_compound .kid-card-account-icon,
+.account-fidelity-product--monthly_end_compound .account-fidelity-product-icon,
+.kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-icon,
+.kid-page .kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon,
+.account-page .account-fidelity-summary--monthly_end_compound .account-fidelity-balance-block {
+  background: #ea580c;
+}
+
+.kid-card-account--stock_market .kid-card-account-icon,
+.account-fidelity-product--stock_market .account-fidelity-product-icon,
+.kid-fidelity-holding-item--stock_market .kid-fidelity-holding-icon,
+.kid-page .kid-fidelity-holding-item--stock_market .kid-fidelity-holding-row:hover .kid-fidelity-holding-icon,
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance-block {
+  background: #ca8a04;
+  color: var(--navy);
+}
+
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance-label,
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance,
+.account-page .account-fidelity-summary--stock_market .account-fidelity-change,
+.account-page .account-fidelity-summary--stock_market .account-fidelity-change-label,
+.account-page .account-fidelity-summary--stock_market .account-fidelity-change-value,
+.kid-card-account--stock_market .kid-card-account-icon,
+.account-fidelity-product--stock_market .account-fidelity-product-icon,
+.kid-fidelity-holding-item--stock_market .kid-fidelity-holding-icon {
+  color: var(--navy);
+}
+
+/* Harder kids-savings layout: narrow stack, gradient heroes, chunky shadows. */
+
+.site-main:has(.family-page),
+.site-main:has(.kid-page),
+.site-main:has(.account-page) {
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.page-header h1,
+:is(.kid-page, .account-page) .account-fidelity-name {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.page-header h1 {
+  font-size: 2.15rem;
+}
+
+.family-page .kids-grid {
+  grid-template-columns: 1fr;
+}
+
+.family-balance-card.card.highlight {
+  background: linear-gradient(155deg, #24507f 0%, #0c2340 48%, #07182c 100%);
+  border-radius: 2rem;
+  padding: 1.55rem 1.55rem 1.65rem;
+  box-shadow:
+    0 6px 0 rgba(7, 24, 44, 0.45),
+    0 18px 32px rgba(12, 35, 64, 0.32);
+}
+
+.family-balance-card .card-title {
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.78);
+  margin-bottom: 0.2rem;
+}
+
+.family-balance-card .big-number {
+  font-size: clamp(3rem, 8vw, 4.15rem);
+}
+
+.family-members-heading {
+  text-transform: none;
+  letter-spacing: -0.02em;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.kid-card {
+  border-radius: 1.85rem;
+  box-shadow:
+    0 5px 0 rgba(12, 35, 64, 0.08),
+    0 16px 28px rgba(12, 35, 64, 0.12);
+}
+
+.kid-card-link {
+  padding: 1.15rem 1.2rem 0.75rem;
+}
+
+.kid-card-avatar {
+  width: 3.4rem;
+  height: 3.4rem;
+  font-size: 1.3rem;
+}
+
+.kid-card-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.kid-card-balance {
+  font-size: 1.85rem;
+}
+
+.kid-card-accounts {
+  gap: 0.55rem;
+  padding: 0.15rem 0.9rem 1rem;
+  border-top: none;
+}
+
+.kid-card-account {
+  padding: 0.72rem 0.85rem;
+  border-radius: 1.15rem;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.05);
+}
+
+.kid-card-account-icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: 0.85rem;
+}
+
+.kid-card-account-name,
+.kid-card-account-balance {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-summary {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-block {
+  margin-top: 0.35rem;
+  padding: 1.45rem 1.45rem 1.35rem;
+  border-radius: 2rem;
+  box-shadow:
+    0 6px 0 rgba(7, 24, 44, 0.4),
+    0 18px 32px rgba(12, 35, 64, 0.28);
+}
+
+.kid-page .account-fidelity-balance-block {
+  background: linear-gradient(155deg, #24507f 0%, #0c2340 48%, #07182c 100%);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance {
+  font-size: clamp(3rem, 8vw, 4.15rem);
+  letter-spacing: -0.045em;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-label,
+:is(.kid-page, .account-page) .account-fidelity-metric-label,
+:is(.kid-page, .account-page) .account-fidelity-product-type,
+:is(.kid-page, .account-page) .account-fidelity-meta dt {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-weight: 800;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-balance-label {
+  font-size: 0.95rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-product-type {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.kid-page .kid-fidelity-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-name {
+  font-size: clamp(1.7rem, 4vw, 2.1rem);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-meta-item {
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.06),
+    0 8px 16px rgba(12, 35, 64, 0.06);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-meta dt,
+:is(.kid-page, .account-page) .account-fidelity-meta dd {
+  display: inline;
+  font-size: 0.82rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-meta dt {
+  margin: 0 0.3rem 0 0;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metrics {
+  gap: 0.7rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric {
+  border-radius: 1.35rem;
+  padding: 1rem 1.05rem 0.95rem;
+  box-shadow:
+    0 4px 0 rgba(12, 35, 64, 0.06),
+    0 12px 20px rgba(12, 35, 64, 0.08);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(1) {
+  background: linear-gradient(160deg, #f4fff8 0%, #c8f0d6 100%);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(2) {
+  background: linear-gradient(160deg, #fff6f4 0%, #ffd4cc 100%);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(3) {
+  background: linear-gradient(160deg, #fffaf0 0%, #ffe3a3 100%);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric-label {
+  font-size: 0.85rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric-value {
+  font-size: 1.4rem;
+}
+
+.account-page .account-fidelity-summary--piggy_bank .account-fidelity-balance-block {
+  background: linear-gradient(150deg, #b794f6 0%, #7c3aed 46%, #5b21b6 100%);
+  box-shadow:
+    0 6px 0 rgba(76, 29, 149, 0.45),
+    0 18px 32px rgba(124, 58, 237, 0.38);
+}
+
+.account-page .account-fidelity-summary--savings_apr .account-fidelity-balance-block {
+  background: linear-gradient(150deg, #4ade80 0%, #16a34a 46%, #166534 100%);
+  box-shadow:
+    0 6px 0 rgba(22, 101, 52, 0.4),
+    0 18px 32px rgba(22, 163, 74, 0.34);
+}
+
+.account-page .account-fidelity-summary--monthly_end_compound .account-fidelity-balance-block {
+  background: linear-gradient(150deg, #fb923c 0%, #ea580c 46%, #c2410c 100%);
+  box-shadow:
+    0 6px 0 rgba(154, 52, 18, 0.42),
+    0 18px 32px rgba(234, 88, 12, 0.36);
+}
+
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance-block {
+  background: linear-gradient(150deg, #f6d365 0%, #ca8a04 48%, #a16207 100%);
+  color: var(--navy);
+  box-shadow:
+    0 6px 0 rgba(120, 74, 4, 0.4),
+    0 18px 32px rgba(202, 138, 4, 0.36);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-panel {
+  border-radius: 1.85rem;
+  padding: 1.2rem 1.2rem 1.25rem;
+  box-shadow:
+    0 5px 0 rgba(12, 35, 64, 0.06),
+    0 16px 28px rgba(12, 35, 64, 0.1);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-panel-head {
+  border-bottom: none;
+  margin-bottom: 0.35rem;
+  padding-bottom: 0;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-panel-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.kid-page .kid-fidelity-accounts {
+  background: transparent;
+  box-shadow: none;
+  padding: 0.15rem 0 0;
+}
+
+.kid-page .kid-fidelity-holdings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.kid-page .kid-fidelity-holding-item {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.kid-page .kid-fidelity-holding-row,
+.kid-page .kid-fidelity-holding-item--piggy_bank .kid-fidelity-holding-row,
+.kid-page .kid-fidelity-holding-item--savings_apr .kid-fidelity-holding-row,
+.kid-page .kid-fidelity-holding-item--monthly_end_compound .kid-fidelity-holding-row,
+.kid-page .kid-fidelity-holding-item--stock_market .kid-fidelity-holding-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.1rem 0.85rem;
+  padding: 0.95rem 1.05rem;
+  border-radius: 1.45rem;
+  background: #fff;
+  border: none;
+  box-shadow:
+    0 4px 0 rgba(12, 35, 64, 0.07),
+    0 14px 24px rgba(12, 35, 64, 0.1);
+}
+
+.kid-page .kid-fidelity-holding-account {
+  grid-column: 1;
+  grid-row: 1;
+  gap: 0.75rem;
+}
+
+.kid-page .kid-fidelity-holding-type {
+  grid-column: 1;
+  grid-row: 2;
+  padding-left: 3.65rem;
+}
+
+.kid-page .kid-fidelity-holding-balance {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: end;
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.kid-page .kid-fidelity-holding-change {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
+  align-self: start;
+}
+
+.kid-page .kid-fidelity-holding-name {
+  font-size: 1.08rem;
+  font-weight: 800;
+}
+
+.kid-page .kid-fidelity-holding-icon {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: 0.95rem;
+}
+
+.kid-page .kid-fidelity-holdings .account-table-add-cell {
+  border-top: none;
+  margin-top: 0.1rem;
+}
+
+.kid-page .kid-fidelity-holdings .add-account-cta {
+  min-height: 4.4rem;
+  border-radius: 1.45rem;
+  border: 2px dashed rgba(12, 35, 64, 0.18);
+  background: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 8px 18px rgba(12, 35, 64, 0.05);
+}
+
+.account-page .account-fidelity-ledger-header {
+  display: none;
+}
+
+.account-page .deposit-list-item {
+  padding: 0.95rem 1.05rem;
+  border-radius: 1.25rem;
+  background: linear-gradient(160deg, #fffdf9 0%, #fff1e4 100%);
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.05),
+    0 10px 18px rgba(12, 35, 64, 0.06);
+}
+
+.account-page .deposit-amount {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.btn.primary {
+  font-weight: 800;
+  box-shadow:
+    0 4px 0 #006b34,
+    0 12px 18px rgba(0, 133, 66, 0.28);
+}
+
+.btn.primary:hover {
+  box-shadow:
+    0 3px 0 #00562a,
+    0 8px 14px rgba(0, 133, 66, 0.24);
+}
+
+.account-page .deposit-month-summary {
+  border: none;
+  border-radius: 1.15rem;
+  background: linear-gradient(160deg, #fffaf0 0%, #ffe8cc 100%);
+  padding: 0.85rem 1rem;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.05);
+}
+
+.account-page .deposit-month-metric-label {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 0.78rem;
+}
+
+.account-page .deposit-month-metric-value {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* Shared chrome so every screen uses the same pills, shadows, and type. */
+
+.app-shell .site-header {
+  background: var(--bg);
+  box-shadow: 0 1px 0 rgba(12, 35, 64, 0.06);
+}
+
+.app-shell .nav-link {
+  background: #fff;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.07);
+}
+
+.app-shell .nav-link:hover,
+.app-shell .nav-link.active {
+  box-shadow: 0 3px 0 rgba(7, 24, 44, 0.35);
+}
+
+.app-shell .nav-context {
+  background: #fff;
+  color: var(--navy);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 800;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.07);
+}
+
+.btn.secondary,
+.account-fidelity-btn-outline {
+  border: none;
+  background: #fff;
+  color: var(--navy);
+  font-weight: 800;
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.1),
+    0 8px 14px rgba(12, 35, 64, 0.06);
+}
+
+.btn.secondary:hover,
+.account-fidelity-btn-outline:hover {
+  background: #fff;
+  border: none;
+}
+
+.kid-card-account-icon,
+.kid-page .kid-fidelity-holding-icon,
+.account-page .account-fidelity-product-icon {
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.14);
+}
+
+.kid-card-account--stock_market {
+  background: rgba(202, 138, 4, 0.22);
+}
+
+.kid-card-remove-btn {
+  margin: 0.15rem 1rem 0.95rem;
+  padding: 0.15rem 0.2rem;
+}
+
+.kid-page .account-fidelity-meta,
+.kid-page .account-fidelity-product-type {
+  display: none;
+}
+
+.account-fidelity-name-edit {
+  text-decoration: none;
+  color: var(--navy);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  font-weight: 800;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.08);
+}
+
+.account-fidelity-name-edit:hover {
+  color: var(--navy);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-breadcrumb {
+  margin-bottom: 0.85rem;
+  font-weight: 800;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-breadcrumb a,
+:is(.kid-page, .account-page) .account-fidelity-meta a {
+  color: var(--navy);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.kid-page .kid-fidelity-holdings .add-account-cta-label,
+.kid-page .kid-fidelity-holdings .add-account-cta-plus,
+.add-child-cta-label,
+.add-child-cta-icon {
+  color: var(--navy);
+  font-weight: 800;
+}
+
+.add-child-cta {
+  min-height: 4.2rem;
+  border-radius: 1.45rem;
+  border: 2px dashed rgba(12, 35, 64, 0.18);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 18px rgba(12, 35, 64, 0.05);
+}
+
+.add-child-cta-icon {
+  border-color: rgba(12, 35, 64, 0.2);
+}
+
+.add-child-cta-label {
+  font-size: 1rem;
+}
+
+:is(.kid-page, .account-page) .account-fidelity-close .account-fidelity-panel-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.account-page .card {
+  border-radius: 1.85rem;
+  box-shadow:
+    0 5px 0 rgba(12, 35, 64, 0.06),
+    0 16px 28px rgba(12, 35, 64, 0.1);
+}
+
+.strategy-rule-modal {
+  border-radius: 1.6rem;
+  box-shadow:
+    0 8px 0 rgba(12, 35, 64, 0.12),
+    0 28px 48px rgba(12, 35, 64, 0.28);
+}
+
+.strategy-modal-header {
+  border-bottom: none;
+  padding-bottom: 0.25rem;
+}
+
+.strategy-modal-title {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+.strategy-rule-modal .input {
+  border: none;
+  border-radius: 1rem;
+  background: #f6f3ee;
+  box-shadow: inset 0 0 0 1px rgba(12, 35, 64, 0.06);
+}
+
+.landing-page h1,
+.landing-page h2,
+.landing-page h3,
+.landing-page .landing-headline,
+.landing-page .landing-section-title,
+.landing-page .landing-cta-title {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+.landing-feature-card {
+  border: none;
+  border-radius: 1.5rem;
+  box-shadow:
+    0 4px 0 rgba(12, 35, 64, 0.06),
+    0 14px 24px rgba(12, 35, 64, 0.08);
+}
+
+.landing-feature-card h3 {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 800;
+}
+
+.landing-type-card.strategy-type-card {
+  border-radius: 1.35rem;
+  box-shadow:
+    0 4px 0 rgba(12, 35, 64, 0.08),
+    0 12px 20px rgba(12, 35, 64, 0.08);
+}
+
+.modal-close-btn {
+  border: none;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--navy);
+  font-weight: 800;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.1);
+}
+
+.modal-close-btn:hover {
+  background: #fff;
+  color: var(--navy);
+}
+
+.strategy-modal-footer {
+  border-top: none;
+}
+
+.strategy-rule-modal a {
+  color: var(--navy);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.deposit-add-modal-fields .deposit-add-modal-field .label,
+.strategy-rule-modal .field .label {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--navy);
+}
+
+.landing-preview-device {
+  border: none;
+  border-radius: 1.75rem;
+  box-shadow:
+    0 6px 0 rgba(12, 35, 64, 0.12),
+    0 22px 36px rgba(12, 35, 64, 0.18);
+}
+
+.landing-preview-balance-card {
+  margin: 0.7rem 0.7rem 0.35rem;
+  border: none;
+  border-radius: 1.2rem;
+  background: linear-gradient(155deg, #24507f 0%, #0c2340 48%, #07182c 100%);
+  box-shadow: 0 4px 0 rgba(7, 24, 44, 0.35);
+}
+
+.landing-preview-label,
+.landing-preview-balance,
+.landing-preview-change.positive,
+.landing-preview-change-label {
+  color: #fff;
+}
+
+.landing-preview-label {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 0.8rem;
+  font-weight: 800;
+  opacity: 0.78;
+}
+
+.landing-preview-balance {
+  font-family: 'Nunito', system-ui, sans-serif;
+}
+
+.landing-preview-account {
+  border: none;
+  border-radius: 0.8rem;
+}
+
+.landing-preview-account--piggy_bank {
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.landing-preview-account--savings_apr {
+  background: rgba(22, 163, 74, 0.12);
+}
+
+.landing-preview-account--monthly_end_compound {
+  background: rgba(234, 88, 12, 0.12);
+}
+
+.landing-preview-account--stock_market {
+  background: rgba(202, 138, 4, 0.2);
+}
+
+/* Tighter heroes, transparent stat tiles, full-card hover, matching homepage. */
+
+.family-balance-card.card.highlight,
+.kid-page .account-fidelity-balance-block,
+.landing-preview-balance-card,
+.landing-cta {
+  background: linear-gradient(165deg, #5b92c7 0%, #2f6eab 100%);
+  box-shadow:
+    0 4px 0 #245a8c,
+    0 10px 16px rgba(36, 90, 140, 0.22);
+}
+
+.landing-cta {
+  margin-top: 1.5rem;
+  border-radius: 2rem;
+}
+
+.landing-cta .landing-cta-title,
+.landing-cta .landing-cta-inner p {
+  color: #fff;
+}
+
+.account-page .account-fidelity-summary--piggy_bank .account-fidelity-balance-block {
+  background: linear-gradient(165deg, #9b74ef 0%, #7c3aed 100%);
+  box-shadow:
+    0 4px 0 #5b21b6,
+    0 10px 16px rgba(124, 58, 237, 0.22);
+}
+
+.account-page .account-fidelity-summary--savings_apr .account-fidelity-balance-block {
+  background: linear-gradient(165deg, #3dce6e 0%, #16a34a 100%);
+  box-shadow:
+    0 4px 0 #15803d,
+    0 10px 16px rgba(22, 163, 74, 0.22);
+}
+
+.account-page .account-fidelity-summary--monthly_end_compound .account-fidelity-balance-block {
+  background: linear-gradient(165deg, #ff8a3d 0%, #ea580c 100%);
+  box-shadow:
+    0 4px 0 #c2410c,
+    0 10px 16px rgba(234, 88, 12, 0.22);
+}
+
+.account-page .account-fidelity-summary--stock_market .account-fidelity-balance-block {
+  background: linear-gradient(165deg, #f0c14a 0%, #d4a017 100%);
+  box-shadow:
+    0 4px 0 #a16207,
+    0 10px 16px rgba(202, 138, 4, 0.22);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metrics {
+  background: #fff;
+  border-radius: 1.45rem;
+  padding: 0.35rem;
+  gap: 0;
+  box-shadow:
+    0 4px 0 rgba(12, 35, 64, 0.06),
+    0 10px 16px rgba(12, 35, 64, 0.06);
+}
+
+:is(.kid-page, .account-page) .account-fidelity-metric,
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(1),
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(2),
+:is(.kid-page, .account-page) .account-fidelity-metric:nth-child(3) {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 1rem;
+}
+
+.kid-card {
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.kid-card-link:hover {
+  background: transparent;
+}
+
+.kid-card:has(.kid-card-link:hover),
+.kid-card:has(.kid-card-link:focus-visible) {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 0 rgba(12, 35, 64, 0.1),
+    0 16px 20px rgba(12, 35, 64, 0.1);
+}
+
+.kid-card:has(.kid-card-link:hover) .kid-card-chevron,
+.kid-card:has(.kid-card-link:focus-visible) .kid-card-chevron {
+  transform: translateX(4px);
+  color: var(--navy);
+  opacity: 1;
+}
+
+.kid-page .kid-fidelity-holding-row {
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.kid-page .kid-fidelity-holding-row.account-row-link--piggy_bank:hover,
+.kid-page .kid-fidelity-holding-row.account-row-link--savings_apr:hover,
+.kid-page .kid-fidelity-holding-row.account-row-link--monthly_end_compound:hover,
+.kid-page .kid-fidelity-holding-row.account-row-link--stock_market:hover {
+  background: #fff;
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 0 rgba(12, 35, 64, 0.08),
+    0 14px 18px rgba(12, 35, 64, 0.1);
+}
+
+.kid-page .kid-fidelity-holding-row:hover .kid-fidelity-holding-name {
+  color: var(--navy);
+}
+
+.landing-page .site-header {
+  background: var(--bg);
+  color: var(--navy);
+  border-bottom: none;
+  box-shadow: 0 1px 0 rgba(12, 35, 64, 0.06);
+}
+
+.landing-page .brand-monogram,
+.landing-page .brand-title {
+  color: var(--navy);
+}
+
+.landing-page .brand-tagline {
+  color: var(--muted);
+}
+
+.landing-page .site-header .btn.secondary {
+  background: #fff;
+  color: var(--navy);
+  border: none;
+  box-shadow:
+    0 3px 0 rgba(12, 35, 64, 0.1),
+    0 8px 14px rgba(12, 35, 64, 0.06);
+}
+
+.landing-trust-row li {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--navy);
+  background: #fff;
+  border: none;
+  padding: 0.4rem 0.75rem;
+  box-shadow: 0 3px 0 rgba(12, 35, 64, 0.07);
+}
+
+.landing-feature-card,
+.landing-type-card.strategy-type-card {
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.landing-feature-card:hover,
+.landing-type-card.strategy-type-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 6px 0 rgba(12, 35, 64, 0.08),
+    0 14px 18px rgba(12, 35, 64, 0.1);
+}
+
+.landing-footer {
+  background: transparent;
+  border-top: none;
+}
+
+.landing-preview-topbar {
+  background: #fff;
+  color: var(--navy);
+}
+
+.landing-preview-topbar-title {
+  font-weight: 800;
+}
+
+.landing-preview-topbar-badge {
+  text-transform: none;
+  letter-spacing: -0.01em;
+  font-weight: 800;
+  background: var(--navy);
+  color: #fff;
+  border: none;
 }
 
