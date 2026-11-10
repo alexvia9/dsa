@@ -4680,6 +4680,7 @@
   .landing-hero {
     grid-template-columns: 1fr 1.05fr;
     gap: 2.5rem;
+    align-items: start;
     padding: 3rem 0 2.5rem;
   }
 }
@@ -4734,23 +4735,38 @@
   color: var(--muted);
 }
 
-/* Product preview (Greenlight-style dashboard mock) */
+/* Product preview — same family cards as the signed-in home. */
 
 .landing-preview {
   position: relative;
+  min-width: 0;
+  pointer-events: none;
 }
 
-.landing-preview::before {
-  content: '';
-  position: absolute;
-  inset: -8% -6% -6%;
-  background: radial-gradient(
-    ellipse at 50% 40%,
-    rgba(0, 166, 81, 0.14) 0%,
-    transparent 68%
-  );
-  pointer-events: none;
-  z-index: 0;
+.landing-preview-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.landing-preview .card {
+  margin-bottom: 0;
+}
+
+.landing-preview .kids-grid {
+  grid-template-columns: 1fr;
+}
+
+.landing-preview .family-balance-card .big-number {
+  font-size: clamp(2.15rem, 4vw, 2.75rem);
+}
+
+.landing-preview .kid-card-account-name {
+  white-space: normal;
+}
+
+.account-types-overview--landing .account-types-group-title:has(+ .landing-type-grid) {
+  margin-bottom: 0.85rem;
 }
 
 .landing-preview-device {
@@ -6635,10 +6651,11 @@
 }
 
 .landing-page .site-header {
-  background: var(--bg);
+  background: rgba(246, 243, 238, 0.92);
   color: var(--navy);
-  border-bottom: none;
-  box-shadow: 0 1px 0 rgba(12, 35, 64, 0.06);
+  border-bottom: 1px solid rgba(12, 35, 64, 0.08);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
 }
 
 .landing-page .brand-monogram,

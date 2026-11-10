@@ -1,165 +1,74 @@
+import { KidAvatar } from './KidAvatar'
 import { StrategyTypeCardIcon } from './icons/StrategyTypeIcons'
+import type { KidAvatarColorId } from '../lib/kidAvatarColors'
+import { formatUsd } from '../lib/money'
 import type { InvestmentStrategy } from '../types/dsa'
 
 type PreviewAccount = {
   name: string
-  balance: string
-  change?: string
-  positive?: boolean
+  balanceCents: number
   mode: InvestmentStrategy['mode']
 }
 
 type PreviewKid = {
   name: string
-  total: string
+  colorId: KidAvatarColorId
   accounts: PreviewAccount[]
 }
 
 const PREVIEW_KIDS: PreviewKid[] = [
   {
     name: 'Sam',
-    total: '$1,204.30',
+    colorId: 'green',
     accounts: [
-      { name: 'Spend', balance: '$142.00', mode: 'piggy_bank' },
-      {
-        name: 'Save',
-        balance: '$612.18',
-        change: '+$3.42',
-        positive: true,
-        mode: 'monthly_end_compound',
-      },
-      {
-        name: 'Market',
-        balance: '$450.12',
-        change: '-$4.18',
-        positive: false,
-        mode: 'stock_market',
-      },
-    ],
-  },
-  {
-    name: 'Riley',
-    total: '$1,643.22',
-    accounts: [
-      { name: 'Give', balance: '$86.50', mode: 'piggy_bank' },
-      {
-        name: 'Save',
-        balance: '$1,056.72',
-        change: '+$12.40',
-        positive: true,
-        mode: 'monthly_end_compound',
-      },
-      {
-        name: 'Savings',
-        balance: '$500.00',
-        change: '+$1.12',
-        positive: true,
-        mode: 'savings_apr',
-      },
+      { name: 'Piggy bank', balanceCents: 5_000, mode: 'piggy_bank' },
+      { name: 'Save', balanceCents: 12_000, mode: 'monthly_end_compound' },
+      { name: 'Market', balanceCents: 24_000, mode: 'stock_market' },
     ],
   },
 ]
 
-function PreviewSparkline() {
-  return (
-    <svg
-      className="landing-preview-sparkline"
-      viewBox="0 0 120 32"
-      aria-hidden
-      focusable="false"
-    >
-      <defs>
-        <linearGradient id="landing-spark-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(0, 166, 81, 0.35)" />
-          <stop offset="100%" stopColor="rgba(0, 166, 81, 0)" />
-        </linearGradient>
-      </defs>
-      <path
-        d="M0 24 L12 22 L24 18 L36 20 L48 14 L60 16 L72 10 L84 12 L96 6 L108 8 L120 4 L120 32 L0 32 Z"
-        fill="url(#landing-spark-fill)"
-      />
-      <path
-        d="M0 24 L12 22 L24 18 L36 20 L48 14 L60 16 L72 10 L84 12 L96 6 L108 8 L120 4"
-        fill="none"
-        stroke="#00a651"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+function kidTotalCents(kid: PreviewKid): number {
+  return kid.accounts.reduce((sum, account) => sum + account.balanceCents, 0)
 }
 
+/** One child, the three balances the story is about. */
 export function LandingProductPreview() {
   return (
     <div className="landing-preview" aria-hidden>
-      <div className="landing-preview-device">
-        <div className="landing-preview-topbar">
-          <span className="landing-preview-topbar-title">Kids at a glance</span>
-          <span className="landing-preview-topbar-badge">Synced</span>
-        </div>
-
-        <div className="landing-preview-balance-card">
-          <p className="landing-preview-label">Total tracked</p>
-          <p className="landing-preview-balance">$2,847.52</p>
-          <div className="landing-preview-balance-meta">
-            <span className="landing-preview-change positive">+$48.12</span>
-            <span className="landing-preview-change-label">this month</span>
-          </div>
-          <PreviewSparkline />
-          <p className="landing-preview-simulated">
-            Simulated. You hold this cash. DSA does not.
-          </p>
-        </div>
-
-        <ul className="landing-preview-kids">
+      <div className="landing-preview-screen family-page">
+        <ul className="kids-grid">
           {PREVIEW_KIDS.map((kid) => (
-            <li key={kid.name} className="landing-preview-kid">
-              <div className="landing-preview-kid-head">
-                <span className="landing-preview-kid-avatar" aria-hidden>
-                  {kid.name.charAt(0)}
-                </span>
-                <div className="landing-preview-kid-title">
-                  <span className="landing-preview-kid-name">{kid.name}</span>
-                  <span className="landing-preview-kid-sub">3 accounts</span>
+            <li key={kid.name}>
+              <article className="card kid-card">
+                <div className="kid-card-link">
+                  <KidAvatar name={kid.name} colorId={kid.colorId} />
+                  <span className="kid-card-summary">
+                    <span className="kid-card-name">{kid.name}</span>
+                    <span className="kid-card-balance">
+                      {formatUsd(kidTotalCents(kid))}
+                    </span>
+                  </span>
                 </div>
-                <span className="landing-preview-kid-total">{kid.total}</span>
-              </div>
-              <ul className="landing-preview-accounts">
-                {kid.accounts.map((account) => (
-                  <li
-                    key={account.name}
-                    className={`landing-preview-account landing-preview-account--${account.mode}`}
-                  >
-                    <span className="landing-preview-account-leading">
-                      <span
-                        className="landing-preview-account-icon"
-                        aria-hidden
-                      >
-                        <StrategyTypeCardIcon mode={account.mode} />
-                      </span>
-                      <span className="landing-preview-account-name">
-                        {account.name}
-                      </span>
-                    </span>
-                    <span className="landing-preview-account-trailing">
-                      {account.change ? (
-                        <span
-                          className={
-                            'landing-preview-account-change ' +
-                            (account.positive ? 'positive' : 'negative')
-                          }
-                        >
-                          {account.change}
+                <ul className="kid-card-accounts" aria-label={`${kid.name}'s accounts`}>
+                  {kid.accounts.map((account) => (
+                    <li
+                      key={account.name}
+                      className={`kid-card-account kid-card-account--${account.mode}`}
+                    >
+                      <span className="kid-card-account-leading">
+                        <span className="kid-card-account-icon">
+                          <StrategyTypeCardIcon mode={account.mode} />
                         </span>
-                      ) : null}
-                      <span className="landing-preview-account-balance">
-                        {account.balance}
+                        <span className="kid-card-account-name">{account.name}</span>
                       </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
+                      <span className="kid-card-account-balance">
+                        {formatUsd(account.balanceCents)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
             </li>
           ))}
         </ul>
